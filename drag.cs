@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//Attach it to the picture
+
 public class drag : MonoBehaviour {
     Vector3 dist;
     float posX;
