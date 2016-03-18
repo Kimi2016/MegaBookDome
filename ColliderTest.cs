@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//Script should be attached to the collider of the book 
+
 public class ColliderTest : MonoBehaviour {
 
     public MegaBookBuilder book;
