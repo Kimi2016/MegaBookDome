@@ -10,8 +10,8 @@ public class MegaBookMouseControl : MonoBehaviour
     public Collider prevcollider;
     public Collider nextcollider;
     public GameObject prefabPage;
-    public Texture2D frontTexture;
-    public Texture2D backTexture;
+    public Texture2D frontTexture = Resources.Load("Textures/MegaBook Front") as Texture2D;
+    public Texture2D backTexture = Resources.Load("Textures/MegaBook Back") as Texture2D;
 
     void Update()
     {
@@ -39,13 +39,12 @@ public class MegaBookMouseControl : MonoBehaviour
                 {
                     if (hit.collider == prevcollider)
                     {
-                        Debug.Log("Prev hit confirm.");
-                        makeOutOfBookPicture(false, new Vector3(-1.5f, 0, 0) + prevcollider.transform.position, backTexture);
+                        makeOutOfBookPicture(false, new Vector3(-1, 0, 0) + prevcollider.transform.position, backTexture);
                     }
                     
                     if (hit.collider == nextcollider)
                     {
-                        makeOutOfBookPicture(true, new Vector3(1.5f, 0, 0) + nextcollider.transform.position, frontTexture);
+                        makeOutOfBookPicture(true, new Vector3(1, 0, 0) + nextcollider.transform.position, frontTexture);
                     }
                 }
             }
@@ -58,15 +57,13 @@ public class MegaBookMouseControl : MonoBehaviour
         try
         {
             int pageNum = book.GetCurrentPage();
-            if (!front)
+            if (pageNum == book.GetPageCount())
                 pageNum = pageNum-1;
 
             Texture2D pageTexture = book.GetPageTexture(pageNum, front) as Texture2D;
 
             if (texture == pageTexture)
-            {
                 return;
-            }
 
             Material material = new Material(Shader.Find("Transparent/Diffuse"));
             material.mainTexture = pageTexture;
