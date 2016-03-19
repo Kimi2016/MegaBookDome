@@ -7,6 +7,7 @@ using System.Collections;
 public class PageCollider : MonoBehaviour {
 
     public MegaBookBuilder book;
+    public bool next;
 
     void OnTriggerEnter(Collider other)
     {
@@ -15,7 +16,10 @@ public class PageCollider : MonoBehaviour {
         {
             Renderer renderer = other.gameObject.GetComponent<Renderer>();
             Texture2D texture = renderer.material.GetTexture("_MainTex") as Texture2D;
-            book.SetPageTexture(texture, book.GetCurrentPage(), true);
+            if(next)
+            book.SetPageTexture(texture, book.GetCurrentPage(), next);
+            else
+                book.SetPageTexture(texture, book.GetCurrentPage() - 1, next); 
             Destroy(other.gameObject);
             Debug.Log("collision detected"); 
             
