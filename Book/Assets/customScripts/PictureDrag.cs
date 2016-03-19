@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class drag : MonoBehaviour {
+//Attach to picture you want to drag.
+
+public class PictureDrag : MonoBehaviour {
     Vector3 dist;
     float posX;
     float posY;
@@ -18,8 +20,4 @@ public class drag : MonoBehaviour {
         transform.position = worldPos;
     }
 
-    void OnMouseOver()
-    {
-        Debug.Log("drag, drag, drag!!!!");
-    }
 }

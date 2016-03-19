@@ -19,9 +19,6 @@ public class MegaBookMouseControl : MonoBehaviour
 					RaycastHit	hit;
 					if ( Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit) )
 					{
-                    if (hit.collider == prevcollider || hit.collider == nextcollider) {
-                        Debug.Log("dropdropdrop");
-                    }
                     if (Input.GetMouseButtonDown(0))
                         {
                             if ( hit.collider == prevcollider )

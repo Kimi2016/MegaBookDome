@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ColliderTest : MonoBehaviour {
+//attached to collider within the book.
+
+
+public class PageCollider : MonoBehaviour {
 
     public MegaBookBuilder book;
 
