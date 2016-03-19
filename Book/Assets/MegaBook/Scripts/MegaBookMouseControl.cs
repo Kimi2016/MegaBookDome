@@ -1,35 +1,82 @@
 ﻿
 using UnityEngine;
+using System.Collections;
 
 // Very simple script to allow mouse clicks to turn pages
 
 public class MegaBookMouseControl : MonoBehaviour
 {
-	public MegaBookBuilder book;
-	public Collider			prevcollider ;
-    public Collider			nextcollider;
+    public MegaBookBuilder book;
+    public Collider prevcollider;
+    public Collider nextcollider;
+    public GameObject prefabPage;
+    public Texture2D frontTexture = Resources.Load("Textures/MegaBook Front") as Texture2D;
+    public Texture2D backTexture = Resources.Load("Textures/MegaBook Back") as Texture2D;
 
     void Update()
-	{
-		if ( book )
-		{
-			
-				if ( prevcollider && nextcollider )
-				{
-					RaycastHit	hit;
-					if ( Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit) )
-					{
-                    if (Input.GetMouseButtonDown(0))
-                        {
-                            if ( hit.collider == prevcollider )
-							    book.PrevPage();
+    {
+        if (book)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (prevcollider && nextcollider)
+                {
+                    RaycastHit hit;
+                    if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
+                    {
+                        if (hit.collider == prevcollider)
+                            book.PrevPage();
 
-						    if ( hit.collider == nextcollider )
-							    book.NextPage();
-					    }
-				}
-			}
-
+                        if (hit.collider == nextcollider)
+                            book.NextPage();
+                    }
+                }
+            }
+            else if (Input.GetMouseButtonDown(1))
+            {
+                RaycastHit hit;
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
+                {
+                    if (hit.collider == prevcollider)
+                    {
+                        makeOutOfBookPicture(false, new Vector3(-1, 0, 0) + prevcollider.transform.position, backTexture);
+                    }
+                    
+                    if (hit.collider == nextcollider)
+                    {
+                        makeOutOfBookPicture(true, new Vector3(1, 0, 0) + nextcollider.transform.position, frontTexture);
+                    }
+                }
+            }
         }
-	}
+    }
+    
+    //Front or back, front if true, push direction is relative to the page position, texture is the page texture if it is the standard once, it will do nothing.
+    private void makeOutOfBookPicture(bool front, Vector3 pushDirection, Texture2D texture)
+    {
+        try
+        {
+            int pageNum = book.GetCurrentPage();
+            if (pageNum == book.GetPageCount())
+                pageNum = pageNum-1;
+
+            Texture2D pageTexture = book.GetPageTexture(pageNum, front) as Texture2D;
+
+            if (texture == pageTexture)
+                return;
+
+            Material material = new Material(Shader.Find("Transparent/Diffuse"));
+            material.mainTexture = pageTexture;
+
+            book.SetPageTexture(texture, pageNum, front);
+
+            prefabPage.GetComponent<Renderer>().material = material;
+            
+            Instantiate(prefabPage, pushDirection, new Quaternion(1, 0, 0, 1));
+        }
+        catch(System.Exception e)
+        {
+            Debug.Log(e.Data);
+        }
+    }
 }

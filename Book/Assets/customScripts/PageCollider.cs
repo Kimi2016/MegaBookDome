@@ -16,7 +16,7 @@ public class PageCollider : MonoBehaviour {
             Renderer renderer = other.gameObject.GetComponent<Renderer>();
             Texture2D texture = renderer.material.GetTexture("_MainTex") as Texture2D;
             book.SetPageTexture(texture, book.GetCurrentPage(), true);
-            other.gameObject.SetActive(false);
+            Destroy(other.gameObject);
             Debug.Log("collision detected"); 
             
         }
