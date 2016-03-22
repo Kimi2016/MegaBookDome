@@ -8,20 +8,33 @@ public class PageCollider : MonoBehaviour {
 
     public MegaBookBuilder book;
     public bool next;
+    public MegaBookMouseControl mouseController;
 
     void OnTriggerEnter(Collider other)
     {
 
         if (other.gameObject.CompareTag("pic"))
         {
+            int pageNum = (int) book.GetPage();
+
+            if (!next)
+                pageNum -= 1;
+            try
+            {
+                if (mouseController.getStandardTexture(next) != book.GetPageTexture(pageNum, next))
+                return;
+            
+
             Renderer renderer = other.gameObject.GetComponent<Renderer>();
             Texture2D texture = renderer.material.GetTexture("_MainTex") as Texture2D;
-            if(next)
-            book.SetPageTexture(texture, book.GetCurrentPage(), next);
-            else
-                book.SetPageTexture(texture, book.GetCurrentPage() - 1, next); 
-            Destroy(other.gameObject);
-            Debug.Log("collision detected"); 
+            
+                book.SetPageTexture(texture, pageNum, next);
+                Destroy(other.gameObject);
+            }
+            catch(System.Exception ex)
+            {
+                Debug.Log(ex);
+            }
             
         }
     }
