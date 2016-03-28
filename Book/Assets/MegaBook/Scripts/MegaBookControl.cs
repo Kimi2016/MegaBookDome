@@ -15,10 +15,10 @@ public class MegaBookControl : MonoBehaviour
 	void Update()
 	{
 		if ( Input.GetKeyDown(KeyCode.RightArrow) )
-			book.NextPage();
+			book.NextPage(new AudioSource());
 
 		if ( Input.GetKeyDown(KeyCode.LeftArrow) )
-			book.PrevPage();
+			book.PrevPage(new AudioSource());
 
 	}
 

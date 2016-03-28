@@ -110,7 +110,7 @@ public class MegaBookBuilder : MonoBehaviour
 	public float			turntime			= 1.0f;
 	public bool				Snap				= true;
 
-	public bool				updatecollider		= false;
+    public bool				updatecollider		= false;
 
 	public Transform		frontcover;
 	public Vector3			frontpivot;
@@ -220,30 +220,37 @@ public class MegaBookBuilder : MonoBehaviour
 		return NumPages;
 	}
 
-	public void NextPage()
+	public void NextPage(AudioSource audio)
 	{
+        audio.Play();
 		page += 1.0f;
 		if ( page > MaxPageVal() )
 			page = MaxPageVal();
 	}
 
-	public void PrevPage()
+	public void PrevPage(AudioSource audio)
 	{
+        audio.Play();
 		page -= 1.0f;
 
 		if ( page < MinPageVal() )
 			page = MinPageVal();
 	}
 
-	public void SetPage(float val, bool force)
+	public void SetPage(float val, bool force, AudioSource audio)
 	{
 		page = val;
 		page = Mathf.Clamp(page, MinPageVal(), MaxPageVal());
-		if ( force )
-		{
-			turnspd = 0.0f;
-			Flip = page;
-		}
+        if (force)
+            {
+                turnspd = 0.0f;
+                Flip = page;
+            }
+        for (int i = (int)val + 1; i >= 0; i--)
+        {
+            audio.Play();
+            Thread.Sleep(250);
+        }
 	}
 
 	public float GetPage()
