@@ -4,6 +4,7 @@ using System.Collections;
 
 // Very simple script to allow mouse clicks to turn pages
 
+
 public class MegaBookMouseControl : MonoBehaviour
 {
     public MegaBookBuilder book;
@@ -12,8 +13,10 @@ public class MegaBookMouseControl : MonoBehaviour
     public GameObject prefabPage;
     public Texture2D frontTexture;
     public Texture2D backTexture;
-    public int fastCycle;
-public bool forward = true;
+    public int speedPage;
+    public AudioSource pageTurnSound;
+    public bool forward = true;
+    public ArrayList toMove = new ArrayList();
     
 
     void Update()
@@ -22,16 +25,31 @@ public bool forward = true;
         {
             if (Input.GetMouseButtonDown(0))
             {
-                if (prevcollider && nextcollider)
+                if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                {
+                    RaycastHit hit;
+                    if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
+                    {
+                        if (hit.collider.gameObject.tag == "pic")
+                        {
+                            GameObject thisGameObj = hit.collider.gameObject;
+
+                            bool picIsInList = toMove.Contains(thisGameObj);
+                            if (!picIsInList)
+                                toMove.Add(thisGameObj);
+                        }
+                    }
+                }
+                else if (prevcollider && nextcollider)
                 {
                     RaycastHit hit;
                     if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
                     {
                         if (hit.collider == prevcollider)
-                            book.PrevPage();
+                            book.PrevPage(pageTurnSound);
 
                         if (hit.collider == nextcollider)
-                            book.NextPage();
+                            book.NextPage(pageTurnSound);
                     }
                 }
             }
@@ -42,7 +60,6 @@ public bool forward = true;
                 {
                     if (hit.collider == prevcollider)
                     {
-                        Debug.Log("Prev hit confirm.");
                         makeOutOfBookPicture(false, new Vector3(-1.5f, 0, 0) + prevcollider.transform.position, backTexture);
                     }
 
@@ -51,22 +68,26 @@ public bool forward = true;
                         makeOutOfBookPicture(true, new Vector3(1.5f, 0, 0) + nextcollider.transform.position, frontTexture);
                     }
                 }
+                else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                {
+                    toMove.Clear();
+                }
             }
             //Doesn't work on the front cover.
             else if (Input.GetMouseButtonDown(2))
             {
-                cycleFast(fastCycle, forward);
+                cycleFast(speedPage, forward);
             }
-            }
+        }
     }
     
 	private void cycleFast(int pages, bool dirForward)
 	{
 	if(dirForward)
-	book.SetPage(1 + pages + (int) book.GetPage(), false);
+	book.SetPage(pages + (int) book.GetPage(), false, pageTurnSound);
 	
 	if(!dirForward)
-	book.SetPage((int) book.GetPage() - pages + 1, false);
+	book.SetPage((int) book.GetPage() - pages, false, pageTurnSound);
 	}
 
 
