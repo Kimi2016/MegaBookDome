@@ -8,6 +8,7 @@ public class PictureDrag : MonoBehaviour {
     Vector3 dist;
     float posX;
     float posY;
+    private bool isInList = false;
     static List<GameObject> moving = new List<GameObject>();
 
     void Update()
@@ -19,7 +20,7 @@ public class PictureDrag : MonoBehaviour {
     }
 
         void OnMouseDown() {
-        if (moving.Contains(this.gameObject))
+        if (isInList)
         {
             foreach(GameObject value in moving)
             value.GetComponent<PictureDrag>().mouseDown();
@@ -59,9 +60,19 @@ public class PictureDrag : MonoBehaviour {
         if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
         {
             if (!moving.Contains(this.gameObject))
+            {
                 moving.Add(this.gameObject);
+                isInList = true;
+
+                this.gameObject.GetComponent<Renderer>().material.EnableKeyword("_NORMALMAP");
+                this.gameObject.GetComponent<Renderer>().material.SetInt("_NORMALMAP", 0);
+            }
             else
+            {
                 moving.Remove(this.gameObject);
+                isInList = false;
+                this.gameObject.GetComponent<Renderer>().material.DisableKeyword("_NORMALMAP");
+            }
         }
     }
 
@@ -69,5 +80,15 @@ public class PictureDrag : MonoBehaviour {
     {
         Debug.Log(this.gameObject + " destroyed!!!");
         moving.Remove(this.gameObject);
+    }
+
+    public List<GameObject> getMovingObjects()
+    {
+        return moving;
+    }
+
+    public bool getIsInList()
+    {
+        return isInList;
     }
 }

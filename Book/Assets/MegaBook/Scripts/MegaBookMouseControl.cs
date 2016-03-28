@@ -107,10 +107,12 @@ public class MegaBookMouseControl : MonoBehaviour
                 return;
             }
 
-            Material material = new Material(Shader.Find("Transparent/Diffuse"));
-            material.mainTexture = pageTexture;
+            Material material = new Material(Shader.Find("Standard"));
+            material.SetTexture("_MainTex", pageTexture);
+            
 
             book.SetPageTexture(texture, pageNum, front);
+            material.SetTexture("_BumpMap", Resources.Load("Textures/MegaBook_Mask_Map") as Texture2D);
 
             prefabPage.GetComponent<Renderer>().material = material;
             Instantiate(prefabPage, pushDirection, new Quaternion(1, 0, 0, 1));
