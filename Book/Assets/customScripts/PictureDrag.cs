@@ -65,7 +65,6 @@ public class PictureDrag : MonoBehaviour {
                 isInList = true;
 
                 this.gameObject.GetComponent<Renderer>().material.EnableKeyword("_NORMALMAP");
-                this.gameObject.GetComponent<Renderer>().material.SetInt("_NORMALMAP", 0);
             }
             else
             {
