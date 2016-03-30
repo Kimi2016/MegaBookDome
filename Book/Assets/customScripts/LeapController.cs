@@ -14,11 +14,13 @@ public class LeapController : MonoBehaviour
     public AudioSource pageTurnSoundFast;
     private Vector3 picturePosition;
     bool singePageTurnDone;
+    bool pictureCurrentlyDragged;
     int frameCount;
 
     void Start()
     {
         singePageTurnDone = false;
+        pictureCurrentlyDragged = false;
         controller = new Controller();
         leapProvider = FindObjectOfType<LeapProvider>() as LeapProvider;
         if (!controller.IsConnected)
@@ -35,6 +37,7 @@ public class LeapController : MonoBehaviour
     void Update()
     {
         Frame frame = leapProvider.CurrentFrame;
+        if(!pictureCurrentlyDragged)
         TurnOverChecker(frame.Hands);
         //used to disable multiple Page Turns when the gesture for one Page turn is used.
         frameCount++;
@@ -43,6 +46,7 @@ public class LeapController : MonoBehaviour
             singePageTurnDone = false;
         }
 
+        
         foreach (Hand hand in frame.Hands)
         {
             if (hand.IsRight)
@@ -52,6 +56,7 @@ public class LeapController : MonoBehaviour
 
             }
         }
+        
 
     }
 
@@ -141,7 +146,7 @@ public class LeapController : MonoBehaviour
                 if (oldTriggerFingerDirectionLeftX - triggerFingerLeft.Direction.x < -0.4)
                 {
                     if (singePageTurnDone == false)
-                    {
+                    {   
                         book.PrevPage(pageTurnSoundSlow);
                         singePageTurnDone = true;
                     }
@@ -153,6 +158,7 @@ public class LeapController : MonoBehaviour
 
     private void DragAndDropChecker(Hand rightHand)
     {
+        pictureCurrentlyDragged = false;
         float grabStrength = rightHand.GrabStrength;
         if (rightHand.PalmNormal.y < -0.7)
         {
@@ -164,6 +170,7 @@ public class LeapController : MonoBehaviour
                 //Debug.Log("distance is " + distance.magnitude);
                 if (distance.magnitude < 0.7)
                 {
+                    pictureCurrentlyDragged = true;
                     picturePosition.x = rightHand.PalmPosition.x;
                     picturePosition.z = rightHand.PalmPosition.z;
                     picturePosition.y = rightHand.PalmPosition.y - 0.2f;
