@@ -42,7 +42,7 @@ public class LeapController : MonoBehaviour
         {
             singePageTurnDone = false;
         }
-        /*
+
         foreach (Hand hand in frame.Hands)
         {
             if (hand.IsRight)
@@ -52,7 +52,7 @@ public class LeapController : MonoBehaviour
 
             }
         }
-        */
+
     }
 
     private void TurnOverChecker(List<Hand> hands)
@@ -154,18 +154,21 @@ public class LeapController : MonoBehaviour
     private void DragAndDropChecker(Hand rightHand)
     {
         float grabStrength = rightHand.GrabStrength;
-        if (grabStrength > 0.6)
+        if (rightHand.PalmNormal.y < -0.7)
         {
-            //Debug.Log("Grab detected... strength is:" + grabStrength);
-            Vector3 unityLeap = rightHand.PalmPosition.ToUnity();
-            Vector3 distance = unityLeap - picture.transform.position;
-            //Debug.Log("distance is " + distance.magnitude);
-            if (distance.magnitude < 0.7)
+            if (grabStrength > 0.6)
             {
-                picturePosition.x = rightHand.PalmPosition.x;
-                picturePosition.z = rightHand.PalmPosition.z;
-                picturePosition.y = rightHand.PalmPosition.y - 0.2f;
-                picture.transform.position = picturePosition;
+                //Debug.Log("Grab detected... strength is:" + grabStrength);
+                Vector3 unityLeap = rightHand.PalmPosition.ToUnity();
+                Vector3 distance = unityLeap - picture.transform.position;
+                //Debug.Log("distance is " + distance.magnitude);
+                if (distance.magnitude < 0.7)
+                {
+                    picturePosition.x = rightHand.PalmPosition.x;
+                    picturePosition.z = rightHand.PalmPosition.z;
+                    picturePosition.y = rightHand.PalmPosition.y - 0.2f;
+                    picture.transform.position = picturePosition;
+                }
             }
         }
     }
