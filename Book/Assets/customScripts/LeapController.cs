@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Leap;
 using LeapInternal;
 using System;
+using System.Threading;
 
 public class LeapController : MonoBehaviour
 {
@@ -14,12 +15,15 @@ public class LeapController : MonoBehaviour
     public AudioSource pageTurnSoundFast;
     private Vector3 picturePosition;
     bool singePageTurnDone;
+    bool fastPageTurnActive;
     bool pictureCurrentlyDragged;
     int frameCount;
 
     void Start()
     {
         singePageTurnDone = false;
+        fastPageTurnActive = true;
+
         pictureCurrentlyDragged = false;
         controller = new Controller();
         leapProvider = FindObjectOfType<LeapProvider>() as LeapProvider;
@@ -37,26 +41,25 @@ public class LeapController : MonoBehaviour
     void Update()
     {
         Frame frame = leapProvider.CurrentFrame;
-        if(!pictureCurrentlyDragged)
-        TurnOverChecker(frame.Hands);
+        if (!pictureCurrentlyDragged)
+            TurnOverChecker(frame.Hands);
         //used to disable multiple Page Turns when the gesture for one Page turn is used.
         frameCount++;
         if (frameCount % 10 == 1)
         {
             singePageTurnDone = false;
+            fastPageTurnActive = true;
         }
 
-        
+
         foreach (Hand hand in frame.Hands)
         {
             if (hand.IsRight)
             {
-
                 DragAndDropChecker(hand);
-
             }
         }
-        
+
 
     }
 
@@ -100,18 +103,36 @@ public class LeapController : MonoBehaviour
 
         if (rightHand != null)
         {
+            /*
+           if (rightHand.GrabStrength > 0.8) {
+               fastPageTurnActive = false;
+               book.SetPage(book.GetCurrentPage(),true,pageTurnSoundSlow);
+               
+           }
+           */
+
             palmVelocityRightX = rightHand.PalmVelocity.x;
-            if (palmVelocityRightX < -2)
+
+            if (palmVelocityRightX < -2 && fastPageTurnActive == true) // 
             {
-                try
+
+                int pageCount = book.GetPageCount();
+                int currentPageNumber = (int)book.GetPage();
+
+                for (int i = currentPageNumber; i <= pageCount; i++)
                 {
-                    book.NextPage(pageTurnSoundFast);
+                    try
+                    {
+                        book.NextPage(pageTurnSoundSlow);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.GetBaseException());
+                    }
                 }
-                catch (Exception e)
-                {
-                    Debug.LogError(e.GetBaseException());
-                }
+
             }
+
             if (rightHand.Fingers[1] != null)
             {
                 triggerFingerRight = rightHand.Fingers[1];
@@ -146,7 +167,7 @@ public class LeapController : MonoBehaviour
                 if (oldTriggerFingerDirectionLeftX - triggerFingerLeft.Direction.x < -0.4)
                 {
                     if (singePageTurnDone == false)
-                    {   
+                    {
                         book.PrevPage(pageTurnSoundSlow);
                         singePageTurnDone = true;
                     }
@@ -179,6 +200,5 @@ public class LeapController : MonoBehaviour
             }
         }
     }
-
 
 }
