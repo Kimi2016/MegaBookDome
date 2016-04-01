@@ -2,16 +2,29 @@
 using System.Collections.Generic;
 using Leap;
 using LeapInternal;
+using System;
+using System.Threading;
 
 public class LeapController : MonoBehaviour
 {
-    Leap.Controller controller;
-    LeapProvider leapProvider;
+    private Leap.Controller controller;
+    private LeapProvider leapProvider;
     public GameObject picture;
-    Vector3 picturePosition;
+    public MegaBookBuilder book;
+    public AudioSource pageTurnSoundSlow;
+    public AudioSource pageTurnSoundFast;
+    private Vector3 picturePosition;
+    bool singePageTurnDone;
+    bool fastPageTurnActive;
+    bool pictureCurrentlyDragged;
+    int frameCount;
 
     void Start()
     {
+        singePageTurnDone = false;
+        fastPageTurnActive = true;
+
+        pictureCurrentlyDragged = false;
         controller = new Controller();
         leapProvider = FindObjectOfType<LeapProvider>() as LeapProvider;
         if (!controller.IsConnected)
@@ -27,31 +40,165 @@ public class LeapController : MonoBehaviour
 
     void Update()
     {
-
         Frame frame = leapProvider.CurrentFrame;
+        if (!pictureCurrentlyDragged)
+            TurnOverChecker(frame.Hands);
+        //used to disable multiple Page Turns when the gesture for one Page turn is used.
+        frameCount++;
+        if (frameCount % 10 == 1)
+        {
+            singePageTurnDone = false;
+            fastPageTurnActive = true;
+        }
+
+
         foreach (Hand hand in frame.Hands)
         {
             if (hand.IsRight)
             {
-                float grabStrength = hand.GrabStrength;
-                if (grabStrength > 0.6)
+                DragAndDropChecker(hand);
+            }
+        }
+
+
+    }
+
+    private void TurnOverChecker(List<Hand> hands)
+    {
+        Hand rightHand = null;
+        Hand leftHand = null;
+        float palmVelocityRightX;
+        float palmVelocityLeftX;
+        Finger triggerFingerRight = null;
+        Finger triggerFingerLeft = null;
+        float oldTriggerFingerDirectionRightX = 0;
+        float oldTriggerFingerDirectionLeftX = 0;
+
+        //Getting older Frame to determine wether the Trigger finger was moving !
+        List<Hand> oldHandList = controller.Frame(4).Hands;
+        foreach (Hand hand in oldHandList)
+        {
+            if (hand.IsRight)
+            {
+                oldTriggerFingerDirectionRightX = hand.Fingers[1].Direction.x;
+            }
+            if (hand.IsLeft)
+            {
+                oldTriggerFingerDirectionLeftX = hand.Fingers[1].Direction.x;
+            }
+        }
+
+        foreach (Hand hand in hands)
+        {
+            if (hand.IsLeft)
+            {
+                leftHand = hand;
+            }
+            if (hand.IsRight)
+            {
+                rightHand = hand;
+            }
+        }
+
+
+        if (rightHand != null)
+        {
+            /*
+           if (rightHand.GrabStrength > 0.8) {
+               fastPageTurnActive = false;
+               book.SetPage(book.GetCurrentPage(),true,pageTurnSoundSlow);
+               
+           }
+           */
+
+            palmVelocityRightX = rightHand.PalmVelocity.x;
+
+            if (palmVelocityRightX < -2 && fastPageTurnActive == true) // 
+            {
+
+                int pageCount = book.GetPageCount();
+                int currentPageNumber = (int)book.GetPage();
+
+                for (int i = currentPageNumber; i <= pageCount; i++)
                 {
-                    Debug.Log("Grab detected... strength is:" + grabStrength);
-                    Vector3 unityLeap = hand.PalmPosition.ToUnity();
-                    Vector3 distance = unityLeap - picture.transform.position;
-                    Debug.Log("distance is " + distance.magnitude);
-                    if (distance.magnitude < 0.7)
+                    try
                     {
-                        picturePosition.x = hand.PalmPosition.x;
-                        picturePosition.z = hand.PalmPosition.z;
-                        picturePosition.y = hand.PalmPosition.y - 0.2f;
-                        picture.transform.position = picturePosition;
+                        book.NextPage(pageTurnSoundSlow);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.GetBaseException());
                     }
                 }
 
             }
+
+            if (rightHand.Fingers[1] != null)
+            {
+                triggerFingerRight = rightHand.Fingers[1];
+                if (oldTriggerFingerDirectionRightX - triggerFingerRight.Direction.x > 0.4)
+                {
+                    if (singePageTurnDone == false)
+                    {
+                        book.NextPage(pageTurnSoundSlow);
+                        singePageTurnDone = true;
+                    }
+                }
+            }
         }
+
+        if (leftHand != null)
+        {
+            palmVelocityLeftX = leftHand.PalmVelocity.x;
+            if (palmVelocityLeftX > 4)
+            {
+                try
+                {
+                    book.PrevPage(pageTurnSoundFast);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.GetBaseException());
+                }
+            }
+            if (leftHand.Fingers[1] != null)
+            {
+                triggerFingerLeft = leftHand.Fingers[1];
+                if (oldTriggerFingerDirectionLeftX - triggerFingerLeft.Direction.x < -0.4)
+                {
+                    if (singePageTurnDone == false)
+                    {
+                        book.PrevPage(pageTurnSoundSlow);
+                        singePageTurnDone = true;
+                    }
+                }
+            }
+        }
+
     }
 
+    private void DragAndDropChecker(Hand rightHand)
+    {
+        pictureCurrentlyDragged = false;
+        float grabStrength = rightHand.GrabStrength;
+        if (rightHand.PalmNormal.y < -0.7)
+        {
+            if (grabStrength > 0.6)
+            {
+                //Debug.Log("Grab detected... strength is:" + grabStrength);
+                Vector3 unityLeap = rightHand.PalmPosition.ToUnity();
+                Vector3 distance = unityLeap - picture.transform.position;
+                //Debug.Log("distance is " + distance.magnitude);
+                if (distance.magnitude < 0.7)
+                {
+                    pictureCurrentlyDragged = true;
+                    picturePosition.x = rightHand.PalmPosition.x;
+                    picturePosition.z = rightHand.PalmPosition.z;
+                    picturePosition.y = rightHand.PalmPosition.y - 0.2f;
+                    picture.transform.position = picturePosition;
+                }
+            }
+        }
+    }
 
 }
