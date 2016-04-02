@@ -50,8 +50,10 @@ public class MegaBookMouseControl : MonoBehaviour
 
                         if (hit.collider == nextcollider)
                             book.NextPage(pageTurnSound);
+
                     }
                 }
+                
             }
             else if (Input.GetMouseButtonDown(1))
             {
@@ -71,6 +73,16 @@ public class MegaBookMouseControl : MonoBehaviour
                 else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
                 {
                     toMove.Clear();
+                }
+                else
+                {
+                    Debug.Log("10 pages now!");
+                    book.AddPages(5);
+                    book.UpdateSettings();
+                    
+                    //book.rebuild = true;
+                  //  book.BuildPages();
+
                 }
             }
             //Doesn't work on the front cover.
