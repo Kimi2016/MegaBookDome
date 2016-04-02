@@ -2104,20 +2104,32 @@ public class MegaBookBuilder : MonoBehaviour
 		}
 	}
 
+    //Remake all the pages.
     public void BuildPages()
     {
+        makePages(0, true, 0);
+    }
+
+    //Used for both BuildPages() and AddPags()
+    //Startpoint is where the book start making pages, clearpages will clear the list pages, addPageNum will add the number of pages to the list.
+    private void makePages(int startPoint, bool clearPages, int addPageNum)
+    {
+
         Quaternion rot = transform.rotation;
         transform.rotation = Quaternion.identity;
         pageindex = 0;
         Random.seed = seed;
 
-        pages.Clear();
+        NumPages += addPageNum;
 
+        if (clearPages)
+            pages.Clear();
+        
         float py = 0.0f;
         if (NumPages > 1)
             py = ((NumPages - 1) * pageGap) * 0.5f;
 
-        for (int i = 0; i < NumPages; i++)
+        for (int i = startPoint; i < NumPages; i++)
         {
             MegaBookPage page = CreatePage(i);
 
@@ -2148,49 +2160,71 @@ public class MegaBookBuilder : MonoBehaviour
         transform.rotation = rot;
     }
 
+    //If n is negativ it will remove n pages.
     public void AddPages(int n)
     {
-        NumPages += n;
-        Quaternion rot = transform.rotation;
-        transform.rotation = Quaternion.identity;
-        pageindex = 0;
-        Random.seed = seed;
+        if (n < 0)
+            removePage(n);
+        else
+            makePages(NumPages, false, n);
+    }
 
-        pages.Clear();
+    private void removePage(int removePageNum)
+    {
+        List<Transform> children = new List<Transform>();
 
-        float py = 0.0f;
-        if (NumPages > 1)
-            py = ((NumPages - 1) * pageGap) * 0.5f;
-
-        for (int i = n; i < NumPages; i++)
+        for (int i = 0; i < gameObject.transform.childCount; i++)
         {
-            MegaBookPage page = CreatePage(i);
-
-            page.obj.transform.localPosition = new Vector3(0.0f, py, 0.0f);
-
-            py -= pageGap;
-
-            // Need to have controls add to start value
-            if (Flex_Random)
-                page.flexer.gizmo_rotation = new Vector3(0.0f, Random.Range(-Flex_RandomDegree, Flex_RandomDegree), 0.0f);
-            else
-                page.flexer.gizmo_rotation = new Vector3(0.0f, Flex_RandomDegree, 0.0f);
-
-            Keyframe key = page.turnerfromcon.keys[0];
-            key.value = -((Turn_CArea * pageWidth) + ((float)(NumPages - (float)i) * (pageGap * Turn_Spread)));
-            page.turnerfromcon.MoveKey(0, key);
-
-            key = page.turnerfromcon.keys[1];
-            key.value = -pageWidth;
-            page.turnerfromcon.MoveKey(1, key);
-
-            key = page.turnerfromcon.keys[2];
-            key.value = -((Turn_CArea * pageWidth) + ((float)i * (pageGap * Turn_Spread)));
-            page.turnerfromcon.MoveKey(2, key);
+            if (gameObject.transform.GetChild(i).name == "Page")
+                children.Add(gameObject.transform.GetChild(i));
         }
 
-        UpdateSettings();
-        transform.rotation = rot;
+        for (int i = children.Count + removePageNum; i < children.Count; i++)
+        {
+            MeshFilter mf = children[i].gameObject.GetComponent<MeshFilter>();
+
+            if (mf)
+            {
+                //Mesh mesh = mf.sharedMesh;
+                //mf.sharedMesh = null;
+
+                //if ( mesh )
+                {
+                    //if ( Application.isEditor )
+                    //DestroyImmediate(mesh);
+                    //else
+                    //Destroy(mesh);
+                }
+            }
+
+            MeshRenderer mr = children[i].gameObject.GetComponent<MeshRenderer>();
+
+            if (mr)
+            {
+                Material[] mats = mr.sharedMaterials;
+
+                //mr.sharedMaterials = null;
+
+                for (int m = 0; m < mats.Length; m++)
+                {
+                    //Material mat = mats[i];
+                    //mats[i] = null;
+                    //if ( Application.isEditor )
+                    //DestroyImmediate(mat);
+                    //else
+                    //Destroy(mat);
+
+                }
+            }
+
+            if (Application.isEditor)
+                DestroyImmediate(children[i].gameObject);
+            else
+                Destroy(children[i].gameObject);
+        }
+
+        Resources.UnloadUnusedAssets();
+        System.GC.Collect();
     }
 
     public void UpdateSettings()

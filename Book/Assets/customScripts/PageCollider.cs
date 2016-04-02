@@ -60,6 +60,8 @@ public class PageCollider : MonoBehaviour {
         }
         catch (System.Exception ex)
         {
+            book.AddPages(2);
+            setPage(obj, pageNum, front);
             Debug.Log(ex);
         }
         return true;
