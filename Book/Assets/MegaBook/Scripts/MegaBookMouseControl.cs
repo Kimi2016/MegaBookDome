@@ -77,8 +77,8 @@ public class MegaBookMouseControl : MonoBehaviour
                 else
                 {
                     Debug.Log("10 pages now!");
-                    book.AddPages(5);
-                    book.UpdateSettings();
+                    book.AddPages(-2);
+                    //book.UpdateSettings();
                     
                     //book.rebuild = true;
                   //  book.BuildPages();
