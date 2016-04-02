@@ -2104,51 +2104,96 @@ public class MegaBookBuilder : MonoBehaviour
 		}
 	}
 
-	public void BuildPages()
-	{
-		Quaternion rot = transform.rotation;
-		transform.rotation = Quaternion.identity;
-		pageindex = 0;
-		Random.seed = seed;
+    public void BuildPages()
+    {
+        Quaternion rot = transform.rotation;
+        transform.rotation = Quaternion.identity;
+        pageindex = 0;
+        Random.seed = seed;
 
-		pages.Clear();
+        pages.Clear();
 
-		float py = 0.0f;
-		if ( NumPages > 1 )
-			py = ((NumPages - 1) * pageGap) * 0.5f;
+        float py = 0.0f;
+        if (NumPages > 1)
+            py = ((NumPages - 1) * pageGap) * 0.5f;
 
-		for ( int i = 0; i < NumPages; i++ )
-		{
-			MegaBookPage page = CreatePage(i);
+        for (int i = 0; i < NumPages; i++)
+        {
+            MegaBookPage page = CreatePage(i);
 
-			page.obj.transform.localPosition = new Vector3(0.0f, py, 0.0f);
+            page.obj.transform.localPosition = new Vector3(0.0f, py, 0.0f);
 
-			py -= pageGap;
+            py -= pageGap;
 
-			// Need to have controls add to start value
-			if ( Flex_Random )
-				page.flexer.gizmo_rotation = new Vector3(0.0f, Random.Range(-Flex_RandomDegree, Flex_RandomDegree), 0.0f);
-			else
-				page.flexer.gizmo_rotation = new Vector3(0.0f, Flex_RandomDegree, 0.0f);
+            // Need to have controls add to start value
+            if (Flex_Random)
+                page.flexer.gizmo_rotation = new Vector3(0.0f, Random.Range(-Flex_RandomDegree, Flex_RandomDegree), 0.0f);
+            else
+                page.flexer.gizmo_rotation = new Vector3(0.0f, Flex_RandomDegree, 0.0f);
 
-			Keyframe key = page.turnerfromcon.keys[0];
-			key.value = -((Turn_CArea * pageWidth) + ((float)(NumPages - (float)i) * (pageGap * Turn_Spread)));
-			page.turnerfromcon.MoveKey(0, key);
+            Keyframe key = page.turnerfromcon.keys[0];
+            key.value = -((Turn_CArea * pageWidth) + ((float)(NumPages - (float)i) * (pageGap * Turn_Spread)));
+            page.turnerfromcon.MoveKey(0, key);
 
-			key = page.turnerfromcon.keys[1];
-			key.value = -pageWidth;
-			page.turnerfromcon.MoveKey(1, key);
+            key = page.turnerfromcon.keys[1];
+            key.value = -pageWidth;
+            page.turnerfromcon.MoveKey(1, key);
 
-			key = page.turnerfromcon.keys[2];
-			key.value = -((Turn_CArea * pageWidth) + ((float)i * (pageGap * Turn_Spread)));
-			page.turnerfromcon.MoveKey(2, key);
-		}
+            key = page.turnerfromcon.keys[2];
+            key.value = -((Turn_CArea * pageWidth) + ((float)i * (pageGap * Turn_Spread)));
+            page.turnerfromcon.MoveKey(2, key);
+        }
 
-		UpdateSettings();
-		transform.rotation = rot;
-	}
+        UpdateSettings();
+        transform.rotation = rot;
+    }
 
-	public void UpdateSettings()
+    public void AddPages(int n)
+    {
+        NumPages += n;
+        Quaternion rot = transform.rotation;
+        transform.rotation = Quaternion.identity;
+        pageindex = 0;
+        Random.seed = seed;
+
+        pages.Clear();
+
+        float py = 0.0f;
+        if (NumPages > 1)
+            py = ((NumPages - 1) * pageGap) * 0.5f;
+
+        for (int i = n; i < NumPages; i++)
+        {
+            MegaBookPage page = CreatePage(i);
+
+            page.obj.transform.localPosition = new Vector3(0.0f, py, 0.0f);
+
+            py -= pageGap;
+
+            // Need to have controls add to start value
+            if (Flex_Random)
+                page.flexer.gizmo_rotation = new Vector3(0.0f, Random.Range(-Flex_RandomDegree, Flex_RandomDegree), 0.0f);
+            else
+                page.flexer.gizmo_rotation = new Vector3(0.0f, Flex_RandomDegree, 0.0f);
+
+            Keyframe key = page.turnerfromcon.keys[0];
+            key.value = -((Turn_CArea * pageWidth) + ((float)(NumPages - (float)i) * (pageGap * Turn_Spread)));
+            page.turnerfromcon.MoveKey(0, key);
+
+            key = page.turnerfromcon.keys[1];
+            key.value = -pageWidth;
+            page.turnerfromcon.MoveKey(1, key);
+
+            key = page.turnerfromcon.keys[2];
+            key.value = -((Turn_CArea * pageWidth) + ((float)i * (pageGap * Turn_Spread)));
+            page.turnerfromcon.MoveKey(2, key);
+        }
+
+        UpdateSettings();
+        transform.rotation = rot;
+    }
+
+    public void UpdateSettings()
 	{
 		ChangeWidthValue(pageWidth);
 		ChangeBookThickness(bookthickness, usebookthickness);

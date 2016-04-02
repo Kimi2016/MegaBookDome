@@ -27,25 +27,29 @@ public class PageCollider : MonoBehaviour {
                 bool front = next;
                 foreach (GameObject value in pd.getMovingObjects())
                 {
-                    setPage(value, pageNum, front);
+                    bool done;
+                    do
+                    {
+                        done = setPage(value, pageNum, front);
 
-                    front = !front;
+                        front = !front;
 
-                    if (!front)
-                        pageNum++;
+                        if (!front)
+                            pageNum++;
+                    } while (!done);
                 }
             }
         }
     }
 
-    private void setPage(GameObject obj, int pageNum, bool front)
+    private bool setPage(GameObject obj, int pageNum, bool front)
     {
         if (!front)
             pageNum--;
         try
         {
             if (mouseController.getStandardTexture(front) != book.GetPageTexture(pageNum, front))
-                return;
+                return false;
 
 
             Renderer renderer = obj.GetComponent<Renderer>();
@@ -58,6 +62,6 @@ public class PageCollider : MonoBehaviour {
         {
             Debug.Log(ex);
         }
-        Debug.Log(" Next : " + front + " Page number : " + pageNum);
+        return true;
     }
 }
