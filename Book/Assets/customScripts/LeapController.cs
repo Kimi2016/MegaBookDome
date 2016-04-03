@@ -14,15 +14,11 @@ public class LeapController : MonoBehaviour
     public AudioSource pageTurnSoundSlow;
     public AudioSource pageTurnSoundFast;
     private Vector3 picturePosition;
-    bool singePageTurnDone;
-    bool fastPageTurnActive;
     bool pictureCurrentlyDragged;
-    int frameCount;
+    private PageTurner pageTurner;
 
     void Start()
     {
-        singePageTurnDone = false;
-        fastPageTurnActive = true;
 
         pictureCurrentlyDragged = false;
         controller = new Controller();
@@ -30,27 +26,25 @@ public class LeapController : MonoBehaviour
         if (!controller.IsConnected)
         {
             Debug.LogError("no LeapMotion Device detected...");
+
         }
         else {
             Debug.Log("Device connected, continue");
+
         }
         picturePosition = picture.transform.position;
+        pageTurner = new PageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
 
     }
 
     void Update()
     {
         Frame frame = leapProvider.CurrentFrame;
-        if (!pictureCurrentlyDragged)
-            TurnOverChecker(frame.Hands);
-        //used to disable multiple Page Turns when the gesture for one Page turn is used.
-        frameCount++;
-        if (frameCount % 10 == 1)
-        {
-            singePageTurnDone = false;
-            fastPageTurnActive = true;
-        }
 
+        if (!pictureCurrentlyDragged)
+        {
+            pageTurner.CheckPageTurnGesture(frame.Hands);
+        }
 
         foreach (Hand hand in frame.Hands)
         {
@@ -63,119 +57,7 @@ public class LeapController : MonoBehaviour
 
     }
 
-    private void TurnOverChecker(List<Hand> hands)
-    {
-        Hand rightHand = null;
-        Hand leftHand = null;
-        float palmVelocityRightX;
-        float palmVelocityLeftX;
-        Finger triggerFingerRight = null;
-        Finger triggerFingerLeft = null;
-        float oldTriggerFingerDirectionRightX = 0;
-        float oldTriggerFingerDirectionLeftX = 0;
-
-        //Getting older Frame to determine wether the Trigger finger was moving !
-        List<Hand> oldHandList = controller.Frame(4).Hands;
-        foreach (Hand hand in oldHandList)
-        {
-            if (hand.IsRight)
-            {
-                oldTriggerFingerDirectionRightX = hand.Fingers[1].Direction.x;
-            }
-            if (hand.IsLeft)
-            {
-                oldTriggerFingerDirectionLeftX = hand.Fingers[1].Direction.x;
-            }
-        }
-
-        foreach (Hand hand in hands)
-        {
-            if (hand.IsLeft)
-            {
-                leftHand = hand;
-            }
-            if (hand.IsRight)
-            {
-                rightHand = hand;
-            }
-        }
-
-
-        if (rightHand != null)
-        {
-            /*
-           if (rightHand.GrabStrength > 0.8) {
-               fastPageTurnActive = false;
-               book.SetPage(book.GetCurrentPage(),true,pageTurnSoundSlow);
-               
-           }
-           */
-
-            palmVelocityRightX = rightHand.PalmVelocity.x;
-
-            if (palmVelocityRightX < -2 && fastPageTurnActive == true) // 
-            {
-
-                int pageCount = book.GetPageCount();
-                int currentPageNumber = (int)book.GetPage();
-
-                for (int i = currentPageNumber; i <= pageCount; i++)
-                {
-                    try
-                    {
-                        book.NextPage(pageTurnSoundSlow);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.GetBaseException());
-                    }
-                }
-
-            }
-
-            if (rightHand.Fingers[1] != null)
-            {
-                triggerFingerRight = rightHand.Fingers[1];
-                if (oldTriggerFingerDirectionRightX - triggerFingerRight.Direction.x > 0.4)
-                {
-                    if (singePageTurnDone == false)
-                    {
-                        book.NextPage(pageTurnSoundSlow);
-                        singePageTurnDone = true;
-                    }
-                }
-            }
-        }
-
-        if (leftHand != null)
-        {
-            palmVelocityLeftX = leftHand.PalmVelocity.x;
-            if (palmVelocityLeftX > 4)
-            {
-                try
-                {
-                    book.PrevPage(pageTurnSoundFast);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e.GetBaseException());
-                }
-            }
-            if (leftHand.Fingers[1] != null)
-            {
-                triggerFingerLeft = leftHand.Fingers[1];
-                if (oldTriggerFingerDirectionLeftX - triggerFingerLeft.Direction.x < -0.4)
-                {
-                    if (singePageTurnDone == false)
-                    {
-                        book.PrevPage(pageTurnSoundSlow);
-                        singePageTurnDone = true;
-                    }
-                }
-            }
-        }
-
-    }
+    //ToDo: put function below into a own class
 
     private void DragAndDropChecker(Hand rightHand)
     {

@@ -17,6 +17,7 @@ public class MegaBookMouseControl : MonoBehaviour
     public AudioSource pageTurnSound;
     public bool forward = true;
     public ArrayList toMove = new ArrayList();
+ 
     
 
     void Update()
