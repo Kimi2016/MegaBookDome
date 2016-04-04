@@ -33,6 +33,10 @@ public class PageTurner : MonoBehaviour
         book.SetTurnTime(0.2f);
     }
 
+    /// <summary>
+    /// Function initializes a timer which disables all Gestures used for "PageTurning" for a specific time.
+    /// </summary>
+    /// <param name="timeIntervall"></param>
     private void InitDisableGesturesTimer(int timeIntervall)
     {
         gesturesTimer = new Timer(timeIntervall); //Set Timer intervall 
@@ -40,6 +44,11 @@ public class PageTurner : MonoBehaviour
         gesturesTimer.Enabled = true;
     }
 
+    /// <summary>
+    /// Initializes a timer which is used for the fast page turn gesture. 
+    /// The timer is necessary so not all pages are turned at once.
+    /// If all page turns would be called at once in a for loop without a timer, it would not be possible to stop the turning pages during the animation.
+    /// </summary>
     private void InitFastTurnTimer()
     {
         fastPageTurnerTimer = new Timer(500); //Set Timer intervall 
@@ -62,13 +71,23 @@ public class PageTurner : MonoBehaviour
         gesturesTimer.Close();
     }
 
-    private void CheckRemainingFastTurnGesture() {
-        if (turnNextPage == true){
+    /// <summary>
+    /// Function is used to determine the right timing for the next Page turn in case of a fast turn gestuer. 
+    /// The NextPage() function of the book is only called once in a time intervall defined within the InitFastTurnTimer() function.
+    /// </summary>
+    private void CheckRemainingFastTurnGesture()
+    {
+        if (turnNextPage == true)
+        {
             book.NextPage(pageTurnSoundSlow);
             turnNextPage = false;
         }
     }
 
+    /// <summary>
+    /// Function is called by the Controller every Frame. It is used to detect Gestures and to trigger to trigger the corresponding functions.
+    /// </summary>
+    /// <param name="hands"></param>
     public void CheckPageTurnGesture(List<Hand> hands)
     {
         Hand rightHand = null;
@@ -124,10 +143,10 @@ public class PageTurner : MonoBehaviour
             {
                 if (gesturesEnabled == true)
                 {
-                    
+
                     InitFastTurnTimer();
                     gesturesEnabled = false;
-                    InitDisableGesturesTimer(1000); 
+                    InitDisableGesturesTimer(1000);
                 }
             }
 
