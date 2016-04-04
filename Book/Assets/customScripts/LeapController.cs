@@ -15,7 +15,7 @@ public class LeapController : MonoBehaviour
     public AudioSource pageTurnSoundFast;
     private Vector3 picturePosition;
     bool pictureCurrentlyDragged;
-    private PageTurner pageTurner;
+    private LeapPageTurner leapPageTurner;
 
     void Start()
     {
@@ -33,7 +33,7 @@ public class LeapController : MonoBehaviour
 
         }
         picturePosition = picture.transform.position;
-        pageTurner = new PageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
+        leapPageTurner = new LeapPageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
 
     }
 
@@ -43,7 +43,7 @@ public class LeapController : MonoBehaviour
 
         if (!pictureCurrentlyDragged)
         {
-            pageTurner.CheckPageTurnGesture(frame.Hands);
+            leapPageTurner.CheckPageTurnGesture(frame.Hands);
         }
 
         foreach (Hand hand in frame.Hands)

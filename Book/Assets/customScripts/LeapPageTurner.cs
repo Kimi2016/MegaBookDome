@@ -10,7 +10,7 @@ using System.Timers;
 /// Class is used to manage the gestures used to turn pages of the book.
 /// </summary>
 
-public class PageTurner : MonoBehaviour
+public class LeapPageTurner : MonoBehaviour
 {
 
     MegaBookBuilder book;
@@ -23,7 +23,7 @@ public class PageTurner : MonoBehaviour
     private bool gesturesEnabled;
     private bool turnNextPage;
 
-    public PageTurner(MegaBookBuilder book, Leap.Controller controller, AudioSource pageTurnSoundSlow, AudioSource pageTurnSoundFast)
+    public LeapPageTurner(MegaBookBuilder book, Leap.Controller controller, AudioSource pageTurnSoundSlow, AudioSource pageTurnSoundFast)
     {
         this.book = book;
         this.controller = controller;
