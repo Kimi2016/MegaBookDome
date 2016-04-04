@@ -56,6 +56,11 @@ public class PageTurner : MonoBehaviour
         fastPageTurnerTimer.Enabled = true;
     }
 
+    /// <summary>
+    /// Fuction is called by the FastPageTurnerTimer when one timeintervall is finished. It is used to turn pages smoothly and allow and interaction with the "stop" gesture.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void EnablePageFastTurn(object sender, ElapsedEventArgs e)
     {
         turnNextPage = true;
@@ -65,6 +70,11 @@ public class PageTurner : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Fuction is called by the gesturesTimer when one timeintervall is finished. It is used to unlock gestures after they have been locked by the InitDisableGesturesTimer() function.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void EnableGestures(object sender, ElapsedEventArgs e)
     {
         gesturesEnabled = true;
@@ -130,7 +140,8 @@ public class PageTurner : MonoBehaviour
 
         if (rightHand != null)
         {
-
+            //Gesture for stopping Fast Page Turn
+            //ToDo: Change gesture to something else.
             if (rightHand.GrabStrength > 0.8)
             {
                 fastPageTurnerTimer.Close();
@@ -139,6 +150,7 @@ public class PageTurner : MonoBehaviour
 
             palmVelocityRightX = rightHand.PalmVelocity.x;
 
+            //Gesture for starting the Fast Page Turn
             if (palmVelocityRightX < -2)
             {
                 if (gesturesEnabled == true)
@@ -150,6 +162,7 @@ public class PageTurner : MonoBehaviour
                 }
             }
 
+            //Gesture for turning a Single Page
             if (rightHand.Fingers[1] != null)
             {
                 triggerFingerRight = rightHand.Fingers[1];
