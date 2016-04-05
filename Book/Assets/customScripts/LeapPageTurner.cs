@@ -22,6 +22,8 @@ public class LeapPageTurner : MonoBehaviour
     private Timer fastPageTurnerTimer;
     private bool gesturesEnabled;
     private bool turnNextPage;
+    private bool turnForward;
+    private bool turnBackward; 
 
     public LeapPageTurner(MegaBookBuilder book, Leap.Controller controller, AudioSource pageTurnSoundSlow, AudioSource pageTurnSoundFast)
     {
@@ -30,6 +32,8 @@ public class LeapPageTurner : MonoBehaviour
         this.pageTurnSoundSlow = pageTurnSoundSlow;
         this.pageTurnSoundFast = pageTurnSoundFast;
         gesturesEnabled = true;
+        turnForward = false;
+        turnBackward = false;
         book.SetTurnTime(0.2f);
     }
 
@@ -87,10 +91,27 @@ public class LeapPageTurner : MonoBehaviour
     /// </summary>
     private void CheckRemainingFastTurnGesture()
     {
-        if (turnNextPage == true)
+        if (turnNextPage && turnForward)
         {
             book.NextPage(pageTurnSoundSlow);
             turnNextPage = false;
+        }
+        if (turnNextPage && turnBackward)
+        {
+            book.PrevPage(pageTurnSoundSlow);
+            turnNextPage = false;
+        }
+
+    }
+
+    private void CheckStopGesture(Hand hand) {
+
+        if (hand.GrabStrength > 0.8)
+        {
+            turnForward = false;
+            turnBackward = false;
+            fastPageTurnerTimer.Close();
+            InitDisableGesturesTimer(3000);
         }
     }
 
@@ -142,11 +163,7 @@ public class LeapPageTurner : MonoBehaviour
         {
             //Gesture for stopping Fast Page Turn
             //ToDo: Change gesture to something else.
-            if (rightHand.GrabStrength > 0.8)
-            {
-                fastPageTurnerTimer.Close();
-                InitDisableGesturesTimer(3000);
-            }
+            CheckStopGesture(rightHand);
 
             palmVelocityRightX = rightHand.PalmVelocity.x;
 
@@ -157,6 +174,8 @@ public class LeapPageTurner : MonoBehaviour
                 {
 
                     InitFastTurnTimer();
+                    turnForward = true;
+                    turnBackward = false;
                     gesturesEnabled = false;
                     InitDisableGesturesTimer(1000);
                 }
@@ -184,14 +203,11 @@ public class LeapPageTurner : MonoBehaviour
             palmVelocityLeftX = leftHand.PalmVelocity.x;
             if (palmVelocityLeftX > 4)
             {
-                try
-                {
-                    book.PrevPage(pageTurnSoundFast);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e.GetBaseException());
-                }
+                InitFastTurnTimer();
+                turnForward = false;
+                turnBackward = true;
+                gesturesEnabled = false;
+                InitDisableGesturesTimer(1000);
             }
             if (leftHand.Fingers[1] != null)
             {
