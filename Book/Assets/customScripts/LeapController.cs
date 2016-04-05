@@ -16,6 +16,7 @@ public class LeapController : MonoBehaviour
     private Vector3 picturePosition;
     bool pictureCurrentlyDragged;
     private LeapPageTurner leapPageTurner;
+    private LeapDragAndDrop leapDragAndDrop;
 
     void Start()
     {
@@ -34,7 +35,7 @@ public class LeapController : MonoBehaviour
         }
         picturePosition = picture.transform.position;
         leapPageTurner = new LeapPageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
-
+        leapDragAndDrop = new LeapDragAndDrop(picture);
     }
 
     void Update()
@@ -51,6 +52,7 @@ public class LeapController : MonoBehaviour
             if (hand.IsRight)
             {
                 DragAndDropChecker(hand);
+                //leapDragAndDrop.CheckDragAndDropGesture(hand);
             }
         }
 
