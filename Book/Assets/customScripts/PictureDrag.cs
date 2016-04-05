@@ -9,20 +9,27 @@ public class PictureDrag : MonoBehaviour {
     float posX;
     float posY;
     private bool isInList = false;
-    static List<GameObject> moving = new List<GameObject>();
+    static List<GameObject> selectedPicture = new List<GameObject>(); //Selected picture, used for moving multiple pictures.
+    static List<GameObject> createdPictures = new List<GameObject>(); //Used for moving one picture only, and also for multiple, where it will be used for the first one.
+
+    //Add the object to the created picture list, which is used to cycle though all objects and order them.
+    void Start()
+    {
+        createdPictures.Add(this.gameObject);
+    }
 
     void Update()
     {
         if (Input.GetMouseButtonDown(1) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
-            moving.Clear();
+            selectedPicture.Clear();
         }
     }
 
         void OnMouseDown() {
         if (isInList)
         {
-            foreach(GameObject value in moving)
+            foreach(GameObject value in selectedPicture)
             value.GetComponent<PictureDrag>().mouseDown();
         }
         else
@@ -38,9 +45,9 @@ public class PictureDrag : MonoBehaviour {
     }
 
     void OnMouseDrag() {
-        if (moving.Contains(this.gameObject))
+        if (selectedPicture.Contains(this.gameObject))
         {
-            foreach (GameObject value in moving)
+            foreach (GameObject value in selectedPicture)
                 value.GetComponent<PictureDrag>().mouseDrag();
         }
         else
@@ -59,31 +66,43 @@ public class PictureDrag : MonoBehaviour {
     {
         if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
         {
-            if (!moving.Contains(this.gameObject))
+            if (!selectedPicture.Contains(this.gameObject))
             {
-                moving.Add(this.gameObject);
+                selectedPicture.Add(this.gameObject);
                 isInList = true;
 
                 this.gameObject.GetComponent<Renderer>().material.EnableKeyword("_NORMALMAP");
             }
             else
             {
-                moving.Remove(this.gameObject);
+                selectedPicture.Remove(this.gameObject);
                 isInList = false;
                 this.gameObject.GetComponent<Renderer>().material.DisableKeyword("_NORMALMAP");
             }
         }
     }
 
+    //Remove the object from both lists.
     void OnDestroy()
     {
-        Debug.Log(this.gameObject + " destroyed!!!");
-        moving.Remove(this.gameObject);
+        createdPictures.Remove(this.gameObject);
+        selectedPicture.Remove(this.gameObject);
     }
 
     public List<GameObject> getMovingObjects()
     {
-        return moving;
+        return selectedPicture;
+    }
+
+    public List<GameObject> getCreatedObjects()
+    {
+        return createdPictures;
+    }
+
+    public void setAsFirstInList(GameObject obj)
+    {
+        createdPictures.Remove(obj);
+        createdPictures.Insert(0, obj);
     }
 
     public bool getIsInList()
