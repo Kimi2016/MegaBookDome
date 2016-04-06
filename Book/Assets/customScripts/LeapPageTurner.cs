@@ -119,8 +119,7 @@ public class LeapPageTurner : MonoBehaviour
 
     private void CheckStopGesture(Hand hand)
     {
-
-
+        
         if (hand.GrabStrength > 0.8)
         {
             if (turnForward || turnBackward)

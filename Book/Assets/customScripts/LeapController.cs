@@ -20,6 +20,7 @@ public class LeapController : MonoBehaviour
     private Vector3 picturePosition;
     bool pictureCurrentlyDragged;
     private LeapPageTurner leapPageTurner;
+    private LeapDragAndDrop leapDragAndDrop;
 
     void Start()
     {
@@ -37,7 +38,11 @@ public class LeapController : MonoBehaviour
 
         }
         leapPageTurner = new LeapPageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
-        //leapDragAndDrop = new LeapDragAndDrop(picture);
+        leapDragAndDrop = new LeapDragAndDrop(leapProvider);
+    }
+
+    public LeapDragAndDrop GetLeapDragAndDrop() {
+        return leapDragAndDrop;
     }
 
     void Update()
