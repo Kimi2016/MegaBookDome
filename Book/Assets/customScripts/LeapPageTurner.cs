@@ -24,6 +24,7 @@ public class LeapPageTurner : MonoBehaviour
     private bool turnNextPage;
     private bool turnForward;
     private bool turnBackward;
+    private bool checkStopGestureEnabled;
     private bool grabbing;
 
     public LeapPageTurner(MegaBookBuilder book, Leap.Controller controller, AudioSource pageTurnSoundSlow, AudioSource pageTurnSoundFast)
@@ -36,6 +37,9 @@ public class LeapPageTurner : MonoBehaviour
         turnNextPage = false;
         turnForward = false;
         turnBackward = false;
+        grabbing = false;
+        checkStopGestureEnabled = false;
+
         book.SetTurnTime(0.2f);
     }
 
@@ -119,20 +123,25 @@ public class LeapPageTurner : MonoBehaviour
 
     private void CheckStopGesture(Hand hand)
     {
-        
+ 
         if (hand.GrabStrength > 0.8)
         {
             if (turnForward || turnBackward)
             {
                 turnForward = false;
                 turnBackward = false;
-                grabbing = true;
                 fastPageTurnerTimer.Close();
+                grabbing = true;
             }
 
         }
         else {
-            grabbing = false;
+            if (grabbing)
+            {
+                checkStopGestureEnabled = false;
+                grabbing = false;
+                DisableGestures(1000);
+            }
         }
 
     }
@@ -152,6 +161,11 @@ public class LeapPageTurner : MonoBehaviour
         Finger triggerFingerLeft = null;
         float oldTriggerFingerDirectionRightX = 0;
         float oldTriggerFingerDirectionLeftX = 0;
+        Finger pinkyRight = null;
+        Finger pinkyLeft = null;
+        float oldPinkyDirectionRightX = 0;
+        float oldPinkyDirectionLeftX = 0;
+
 
         CheckRemainingFastTurnGesture();
 
@@ -162,10 +176,12 @@ public class LeapPageTurner : MonoBehaviour
             if (hand.IsRight)
             {
                 oldTriggerFingerDirectionRightX = hand.Fingers[1].Direction.x;
+                oldPinkyDirectionRightX = hand.Fingers[4].Direction.x;
             }
             if (hand.IsLeft)
             {
                 oldTriggerFingerDirectionLeftX = hand.Fingers[1].Direction.x;
+                oldPinkyDirectionLeftX = hand.Fingers[4].Direction.x;
             }
         }
 
@@ -186,7 +202,10 @@ public class LeapPageTurner : MonoBehaviour
         {
             //Gesture for stopping Fast Page Turn
             //ToDo: Change gesture to something else.
-            CheckStopGesture(rightHand);
+            if (checkStopGestureEnabled)
+            {
+                CheckStopGesture(rightHand);
+            }
 
             palmVelocityRightX = rightHand.PalmVelocity.x;
 
@@ -198,16 +217,18 @@ public class LeapPageTurner : MonoBehaviour
 
                     InitFastTurnTimer();
                     turnForward = true;
+                    checkStopGestureEnabled = true;
                     turnBackward = false;
                     DisableGestures(1000);
                 }
             }
 
             //Gesture for turning a Single Page
-            if (rightHand.Fingers[1] != null)
+            if (rightHand.Fingers[1] != null && rightHand.Fingers[4] != null)
             {
                 triggerFingerRight = rightHand.Fingers[1];
-                if (oldTriggerFingerDirectionRightX - triggerFingerRight.Direction.x > 0.4)
+
+                if (oldTriggerFingerDirectionRightX - triggerFingerRight.Direction.x > 0.4) // && oldPinkyDirectionRightX - pinkyLeft.Direction.x > 0.4
                 {
                     if (gesturesEnabled == true)
                     {
@@ -221,7 +242,10 @@ public class LeapPageTurner : MonoBehaviour
 
         if (leftHand != null)
         {
-            CheckStopGesture(leftHand);
+            if (checkStopGestureEnabled)
+            {
+                CheckStopGesture(leftHand);
+            }
             palmVelocityLeftX = leftHand.PalmVelocity.x;
             if (palmVelocityLeftX > 4)
             {
@@ -230,13 +254,14 @@ public class LeapPageTurner : MonoBehaviour
                     InitFastTurnTimer();
                     turnForward = false;
                     turnBackward = true;
+                    checkStopGestureEnabled = true;
                     DisableGestures(1000);
                 }
             }
-            if (leftHand.Fingers[1] != null)
+            if (leftHand.Fingers[1] != null && leftHand.Fingers[4] != null)
             {
                 triggerFingerLeft = leftHand.Fingers[1];
-                if (oldTriggerFingerDirectionLeftX - triggerFingerLeft.Direction.x < -0.4)
+                if (oldTriggerFingerDirectionLeftX - triggerFingerLeft.Direction.x < -0.4) // && oldPinkyDirectionLeftX - pinkyLeft.Direction.x < -0.4
                 {
                     if (gesturesEnabled == true)
                     {
