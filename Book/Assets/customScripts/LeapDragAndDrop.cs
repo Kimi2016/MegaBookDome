@@ -8,33 +8,43 @@ using Leap;
 /// </summary>
 public class LeapDragAndDrop : MonoBehaviour
 {
-    private GameObject picture;
-    private Vector3 currentPicturePosition;
 
-    public LeapDragAndDrop(GameObject picture)
+    private LeapProvider leapProvider;
+
+    public LeapDragAndDrop(LeapProvider leapProvider)
     {
-        this.picture = picture;
+        this.leapProvider = leapProvider;
+    }
+
+    private Hand GetRightHand()
+    {
+        Hand rightHand = null;
+        Frame frame = leapProvider.CurrentFrame;
+        foreach (Hand hand in frame.Hands)
+        {
+            if (hand.IsRight)
+            {
+                rightHand = hand;
+            }
+        }
+        return rightHand;
     }
 
     /// <summary>
-    /// Function called by LeapController every frame. Function is used to determine whether the grap gesture is done by the user.
+    /// Function called to check wether to drag and drop the picture if the user is "looking" at it. If so, the picture is dragged.
     /// </summary>
     /// <param name="rightHand"></param>
-    public void CheckDragAndDropGesture(Hand rightHand)
+    public void CheckDragAndDropGesture(GameObject picture)
     {
-        if (rightHand.PalmNormal.y < -0.7) //if hand is "looking" down to the picture
+        Hand rightHand = GetRightHand();
+        Vector3 newPicturePosition;
+        if (rightHand.GrabStrength > 0.6) //if hand is grabbing
         {
-            if (rightHand.GrabStrength > 0.6) //if hand is grabbing
-            {
-                Vector3 distance = rightHand.PalmPosition.ToUnity() - picture.transform.position; //distance between hand and picture
-                if (distance.magnitude < 0.7)
-                {
-                    currentPicturePosition.x = rightHand.PalmPosition.x;
-                    currentPicturePosition.z = rightHand.PalmPosition.z;
-                    currentPicturePosition.y = rightHand.PalmPosition.y - 0.2f; //picture will be placed directly below the right hand
-                    picture.transform.position = picture.transform.position;
-                }
-            }
+            newPicturePosition.x = rightHand.PalmPosition.x;
+            newPicturePosition.z = rightHand.PalmPosition.z;
+            newPicturePosition.y = rightHand.PalmPosition.y - 0.2f; //picture will be placed directly below the right hand
+            picture.transform.position = newPicturePosition;
         }
     }
+
 }
