@@ -2,6 +2,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+//using System;
+//using System.Random;
 
 #if !UNITY_FLASH && !UNITY_PS3 && !UNITY_METRO && !UNITY_WP8
 using System.Threading;
@@ -116,7 +118,8 @@ public class MegaBookBuilder : MonoBehaviour
 	public Vector3			frontpivot;
 	public float			frontang;
 	public Transform		backcover;
-	public float			backang;
+
+    public float			backang;
 	public Vector3			backpivot;
 	public bool				showcover = false;
 
@@ -2110,7 +2113,7 @@ public class MegaBookBuilder : MonoBehaviour
         makePages(0, true, 0);
     }
 
-    //Used for both BuildPages() and AddPags()
+    //Used for both BuildPages() and AddPages()
     //Startpoint is where the book start making pages, clearpages will clear the list pages, addPageNum will add the number of pages to the list.
     private void makePages(int startPoint, bool clearPages, int addPageNum)
     {
@@ -2642,4 +2645,32 @@ public class MegaBookBuilder : MonoBehaviour
 	{
 		return oldpos;
 	}
+
+    public void RemoveUnnecessaryPages(bool front, Texture2D frontTexture, Texture2D backTexture, int pageNum)
+    {
+        Debug.Log("Working??");
+        pageNum++;
+        int pageToRemove = 0;
+
+        for (int i = NumPages - 1 ; i > pageNum; i--)
+        {
+            if (IsPictureLess(i, true, frontTexture) && IsPictureLess(i, false, backTexture))
+            {
+                Debug.Log("Add 1");
+                pageToRemove--;
+            }
+            else
+            {
+                removePage(pageToRemove);
+                return;
+            }
+        }
+    }
+
+    private bool IsPictureLess(int num, bool front, Texture2D standard)
+    {
+        if (GetPageTexture(num, front) == standard)
+            return true;
+        return false;
+    }
 }

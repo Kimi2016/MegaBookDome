@@ -129,6 +129,8 @@ public class MegaBookMouseControl : MonoBehaviour
 
             prefabPage.GetComponent<Renderer>().material = material;
             Instantiate(prefabPage, pushDirection, new Quaternion(1, 0, 0, 1));
+
+            book.RemoveUnnecessaryPages(front, frontTexture, backTexture, pageNum);
         }
         catch(System.Exception e)
         {
