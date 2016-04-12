@@ -21,6 +21,7 @@ public class LeapController : MonoBehaviour
     bool pictureCurrentlyDragged;
     private LeapPageTurner leapPageTurner;
     private LeapDragAndDrop leapDragAndDrop;
+    private LeapPageTurnerV2 leapPageTurnerV2;
 
     void Start()
     {
@@ -39,6 +40,7 @@ public class LeapController : MonoBehaviour
         }
         leapPageTurner = new LeapPageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
         leapDragAndDrop = new LeapDragAndDrop(leapProvider);
+        leapPageTurnerV2 = new LeapPageTurnerV2(book, controller, pageTurnSoundSlow);
     }
 
     public LeapDragAndDrop GetLeapDragAndDrop() {
@@ -52,6 +54,7 @@ public class LeapController : MonoBehaviour
         if (!pictureCurrentlyDragged)
         {
             leapPageTurner.CheckPageTurnGesture(frame.Hands);
+            leapPageTurnerV2.CheckPageTurnGesture(frame.Hands);
         }
 
         foreach (Hand hand in frame.Hands)
