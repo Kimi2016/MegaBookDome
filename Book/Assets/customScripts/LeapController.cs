@@ -53,7 +53,7 @@ public class LeapController : MonoBehaviour
 
         if (!pictureCurrentlyDragged)
         {
-            leapPageTurner.CheckPageTurnGesture(frame.Hands);
+            //leapPageTurner.CheckPageTurnGesture(frame.Hands);
             leapPageTurnerV2.CheckPageTurnGesture(frame.Hands);
         }
 
