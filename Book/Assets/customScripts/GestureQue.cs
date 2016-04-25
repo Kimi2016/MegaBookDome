@@ -18,8 +18,14 @@ public class GestureQue
         return que[0];
     }
 
-    public string getOldGesture() {
+    public string getOldGesture()
+    {
         return que[1];
+    }
+
+    public void setOldGesture(string oldGesture)
+    {
+        que[1] = oldGesture;
     }
 
     public void setLastGesture(string lastGesture)
