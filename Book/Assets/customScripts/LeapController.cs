@@ -8,7 +8,7 @@ using System.Threading;
 public class LeapController : MonoBehaviour
 {
 
-    private Controller controller;
+    private Leap.Controller controller;
     private LeapProvider leapProvider;
     //   public GameObject picture;
     public MegaBookBuilder book;
@@ -19,35 +19,33 @@ public class LeapController : MonoBehaviour
     public AudioSource pageTurnSoundFast;
     private Vector3 picturePosition;
     bool pictureCurrentlyDragged;
-    bool notTapping;
     private LeapPageTurner leapPageTurner;
     private LeapDragAndDrop leapDragAndDrop;
+    private LeapPageTurnerV2 leapPageTurnerV2;
 
     void Start()
     {
-        notTapping = true;
+
         pictureCurrentlyDragged = false;
         controller = new Controller();
         leapProvider = FindObjectOfType<LeapProvider>() as LeapProvider;
         if (!controller.IsConnected)
         {
             Debug.LogError("no LeapMotion Device detected...");
+
         }
         else {
             Debug.Log("Device connected, continue");
 
         }
-
         leapPageTurner = new LeapPageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
         leapDragAndDrop = new LeapDragAndDrop(leapProvider);
-        
+        leapPageTurnerV2 = new LeapPageTurnerV2(book, controller, pageTurnSoundSlow);
     }
 
     public LeapDragAndDrop GetLeapDragAndDrop() {
         return leapDragAndDrop;
     }
-
-
 
     void Update()
     {
@@ -55,29 +53,17 @@ public class LeapController : MonoBehaviour
 
         if (!pictureCurrentlyDragged)
         {
-            leapPageTurner.CheckPageTurnGesture(frame.Hands);
+            //leapPageTurner.CheckPageTurnGesture(frame.Hands);
+            leapPageTurnerV2.CheckPageTurnGesture(frame.Hands);
         }
-        
+
         foreach (Hand hand in frame.Hands)
         {
             if (hand.IsRight)
             {
                 DragAndDropChecker(hand);
-
-                if (hand.GrabStrength < 0.4 && hand.PalmNormal.y < -0.7) // && hand.)
-                {
-                   // Debug.Log(hand.PalmNormal);
-                    if (hand.Fingers[1].TipVelocity.y - hand.Fingers[2].TipVelocity.y < -0.5f && notTapping)
-                    {
-                        Debug.Log("TAAAAP!!!!");
-                        notTapping = false;
-                    }
-                    else if (hand.Fingers[1].TipVelocity.y - hand.Fingers[2].TipVelocity.y > 0.5f && !notTapping)
-                    {
-                        notTapping = true;
-                    }
-                }
-            }       
+                //leapDragAndDrop.CheckDragAndDropGesture(hand);
+            }
             if (!pictureCurrentlyDragged && hand.GrabStrength > 0.7)
             {
                 Vector3 unityLeap = hand.PalmPosition.ToUnity();
@@ -124,8 +110,6 @@ public class LeapController : MonoBehaviour
 
             prefabPage.GetComponent<Renderer>().material = material;
             Instantiate(prefabPage, pushDirection, new Quaternion(1, 0, 0, 1));
-
-            book.RemoveUnnecessaryPages(front, frontTexture, backTexture, pageNum);
         }
         catch (System.Exception e)
         {
