@@ -29,7 +29,7 @@ public class LeapPageTurnerV2 : MonoBehaviour
     }
 
     /// <summary>
-    /// Decreases the probability of a circle gesture beein currently done. Probability is increased by every "circle gesture".
+    /// creates and enables Timer object which is used to decrease the probability of a circle gesture beein currently done. Probability is increased by every "circle gesture".
     /// </summary>
     private void initializeCircleProbabilityTimer()
     {
@@ -38,6 +38,11 @@ public class LeapPageTurnerV2 : MonoBehaviour
         circleProbabilityTimer.Enabled = true;
     }
 
+    /// <summary>
+    /// Function called by timer every X seconds to decrease the circle probability. If the user isnt doing anything the circle probability will be 0 then...
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void decreaseCircleProbability(object sender, ElapsedEventArgs e)
     {
         if (probabilityTracker.getCircleMovement() > 0)
@@ -59,6 +64,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Funtion is used to check the last 3 "directions vectors" in the gesture que. If the direction vectors appear to be a circle which goes into the same direction, a page will be turned.
+    /// </summary>
     private void circleChecker()
     {
         //Check forward Gesture
@@ -115,6 +123,12 @@ public class LeapPageTurnerV2 : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Figures out which is the left and which is the right hand and returns it.
+    /// </summary>
+    /// <param name="frameID"></param>
+    /// <param name="leftOrRight"></param>
+    /// <returns></returns>
     private Hand getHand(int frameID, string leftOrRight)
     {
         Hand rightHand = null;
@@ -140,6 +154,12 @@ public class LeapPageTurnerV2 : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Function is used to update the probabilities of all the "direction vectors". 
+    /// </summary>
+    /// <param name="currentHand"></param>
+    /// <param name="oldHand"></param>
+    /// <param name="leftOrRight"></param>
     private void updateHandMovementProbability(Hand currentHand, Hand oldHand, string leftOrRight)
     {
         Vector currentHandPosition = currentHand.PalmPosition;
@@ -252,6 +272,12 @@ public class LeapPageTurnerV2 : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// updates the gesture que. If the probability of a direction vector goes over a certain threshold, the direction vector is pushed into the gesture que.
+    /// </summary>
+    /// <param name="currentHand"></param>
+    /// <param name="veryOldHand"></param>
+    /// <param name="leftOrRight"></param>
     private void updateGestureQue(Hand currentHand, Hand veryOldHand, string leftOrRight)
     {
 
@@ -302,6 +328,10 @@ public class LeapPageTurnerV2 : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Function forecasts the next possible direction vectors and increases or decreases their probability in advance.
+    /// </summary>
+    /// <param name="lastDirection"></param>
     private void circleForcaster(string lastDirection)
     {
 
@@ -368,6 +398,10 @@ public class LeapPageTurnerV2 : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Still beta till now... Experimenting with that.
+    /// </summary>
+    /// <param name="currentHand"></param>
     public void fastPageTurnChecker(Hand currentHand)
     {
         Vector palmVelocity = currentHand.PalmVelocity;
@@ -399,6 +433,10 @@ public class LeapPageTurnerV2 : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Function called by the LeapController class. It is used to call the necessary functions to make the gesture work.
+    /// </summary>
+    /// <param name="hands"></param>
     public void CheckPageTurnGesture(List<Hand> hands)
     {
         Hand rightCurrentHand = getHand(0, "right");
