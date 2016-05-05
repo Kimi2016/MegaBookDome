@@ -137,8 +137,9 @@ public class MegaBookBuilder : MonoBehaviour
 	public Color				color = Color.white;
 
 	public bool					linkeditpage = true;
+    
 
-	[ContextMenu("Help")]
+    [ContextMenu("Help")]
 	public void Help()
 	{
 		Application.OpenURL("http://www.west-racing.com/mf/?page_id=5422");
@@ -229,7 +230,8 @@ public class MegaBookBuilder : MonoBehaviour
 		page += 1.0f;
 		if ( page > MaxPageVal() )
 			page = MaxPageVal();
-	}
+
+    }
 
 	public void PrevPage(AudioSource audio)
 	{
@@ -238,7 +240,7 @@ public class MegaBookBuilder : MonoBehaviour
 
 		if ( page < MinPageVal() )
 			page = MinPageVal();
-	}
+    }
 
 	public void SetPage(float val, bool force, AudioSource audio)
 	{
@@ -254,7 +256,7 @@ public class MegaBookBuilder : MonoBehaviour
             audio.Play();
             Thread.Sleep(250);
         }
-	}
+    }
 
 	public float GetPage()
 	{
@@ -642,8 +644,10 @@ public class MegaBookBuilder : MonoBehaviour
 			return image;
 	}
 
-	void Start()
+    
+    void Start()
 	{
+        
 		if ( Application.isPlaying )
 		{
 			//if ( background && madepages.Count == 0 )
@@ -1912,9 +1916,10 @@ public class MegaBookBuilder : MonoBehaviour
 		UpdateSettings();
 	}
 
-	void Update()
+    void Update()
 	{
-		if ( rebuildmeshes )
+
+        if ( rebuildmeshes )
 		{
 			rebuildmeshes = false;
 			RebuildMeshes();

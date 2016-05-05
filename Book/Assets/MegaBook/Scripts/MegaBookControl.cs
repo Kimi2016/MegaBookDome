@@ -12,7 +12,14 @@ public class MegaBookControl : MonoBehaviour
         Debug.Log("Starting Controller");
 	}
 
-	void Update()
+    void OnGUI()
+    {
+        
+     
+    }
+
+
+    void Update()
 	{
 		if ( Input.GetKeyDown(KeyCode.RightArrow) )
 			book.NextPage(new AudioSource());
