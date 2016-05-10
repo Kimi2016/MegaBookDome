@@ -66,21 +66,29 @@ public class PictureDrag : MonoBehaviour {
     {
         if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
         {
-            if (!selectedPicture.Contains(this.gameObject))
+            selectNDeselPic();
+        }
+    }
+
+    //If it retruns true it is added to the list, false for removed.
+    public bool selectNDeselPic()
+        {
+        if (!selectedPicture.Contains(this.gameObject))
             {
                 selectedPicture.Add(this.gameObject);
                 isInList = true;
 
                 this.gameObject.GetComponent<Renderer>().material.EnableKeyword("_NORMALMAP");
+                return true;
             }
             else
             {
                 selectedPicture.Remove(this.gameObject);
                 isInList = false;
                 this.gameObject.GetComponent<Renderer>().material.DisableKeyword("_NORMALMAP");
+                return false;
             }
-        }
-    }
+       }
 
     //Remove the object from both lists.
     void OnDestroy()
