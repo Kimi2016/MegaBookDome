@@ -75,34 +75,42 @@ public class ProbabilityTracker
     //decrease
     public void decreaseLeftHandLeftUp()
     {
+        if(leftHandLeftUp >= 0)
         leftHandLeftUp--;
     }
     public void decreaseRightHandLeftUp()
     {
+        if(rightHandLeftUp >= 0)
         rightHandLeftUp--;
     }
     public void decreaseLeftHandRightUp()
     {
+        if(leftHandRightUp >= 0)
         leftHandRightUp--;
     }
     public void decreaseRightHandRightUp()
     {
-        rightHandRightUp--;
+        if(rightHandRightUp >= 0)
+         rightHandRightUp--;
     }
     public void decreaseLeftHandRightDown()
     {
+        if(leftHandRightDown >= 0)
         leftHandRightDown--;
     }
     public void decreaseRightHandRightDown()
     {
+        if(rightHandRightDown >= 0)
         rightHandRightDown--;
     }
     public void decreaseLeftHandLeftDown()
     {
+        if(leftHandLeftDown >= 0)
         leftHandLeftDown--;
     }
     public void decreaseRightHandLeftDown()
     {
+        if(rightHandLeftDown >=0)
         rightHandLeftDown--;
     }
 
