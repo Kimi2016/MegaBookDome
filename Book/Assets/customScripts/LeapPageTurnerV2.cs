@@ -10,21 +10,24 @@ public class LeapPageTurnerV2 : MonoBehaviour
     private MegaBookBuilder book;
     private AudioSource pageTurnSound;
     private Leap.Controller controller;
-    private GestureQueV2 RightHandgestureQue = new GestureQueV2();
+    private GestureQueV2 gestureQue = new GestureQueV2();
     private ProbabilityTracker probabilityTracker = new ProbabilityTracker();
-    private int rightUpGestureProbability;
-    private int rightDownGestureProbability;
-    private int leftDownGestureProbability;
     private Timer circleProbabilityTimer;
-    private Timer fastForwardTimer;
-    private bool fastForward = false;
-    private bool fastForwardTimerActive = false;
+    private Timer fastPageTurnTimer;
+    private bool fastPageTurn = false;
+    private bool fastForwardActive = false;
+    private bool fastBackwardActive = false;
+
 
     //the next two variables are used in updateGestureQue as thresholds.
-    public int probabilityThreshold = 13;
-    public int distanceThreshold = 27;
+    private int probabilityThreshold = 13;
+    private int GestureDistanceThreshold = 27;
+    private int circleProbabilityThreshhold = 6;
+    private int ProbabilityDistanceThreshold = 1;
+    private int fastPageTurnSpeedThreshold = 9000;
     //Number of elements saved for speed estimation, -1, so if it is 21 it is actually 20.
     private List<float> speedList = new List<float>(21);
+    private Queue<float> speedQue = new Queue<float>();
 
     public LeapPageTurnerV2(MegaBookBuilder book, Leap.Controller controller, AudioSource pageTurnSound)
     {
@@ -32,6 +35,16 @@ public class LeapPageTurnerV2 : MonoBehaviour
         this.pageTurnSound = pageTurnSound;
         this.controller = controller;
         initializeCircleProbabilityTimer();
+        initializeSpeedQue();
+    }
+
+    /// <summary>
+    /// Initilizes the que with stores the speed of the handpalm of the last 20 frames. Initialization means storing 20 times 0 in the que.
+    /// </summary>
+    private void initializeSpeedQue() {
+        for (int i = 0; i < 20; i++) {
+            speedQue.Enqueue(0); 
+        }
     }
 
     /// <summary>
@@ -51,22 +64,22 @@ public class LeapPageTurnerV2 : MonoBehaviour
     /// <param name="e"></param>
     private void decreaseCircleProbability(object sender, ElapsedEventArgs e)
     {
-        if (probabilityTracker.getCircleMovement() > 0)
+        if (probabilityTracker.getForwardCircle() > 0)
         {
-            probabilityTracker.decreaseCircleMovement();
+            probabilityTracker.decreaseForwardCircle();
         }
     }
 
-    private void initilizeFastForwardTimer()
+    private void initilizeFastPageTurnTimer()
     {
-        fastForwardTimer = new Timer(100); //Set Timer intervall 
-        fastForwardTimer.Elapsed += enableFastForward; // Hook up the method to the timer
-        fastForwardTimer.Enabled = true;
+        fastPageTurnTimer = new Timer(200); //Set Timer intervall 
+        fastPageTurnTimer.Elapsed += enableFastPageTurn; // Hook up the method to the timer
+        fastPageTurnTimer.Enabled = true;
     }
 
-    private void enableFastForward(object sender, ElapsedEventArgs e)
+    private void enableFastPageTurn(object sender, ElapsedEventArgs e)
     {
-        fastForward = true;
+        fastPageTurn = true;
     }
 
 
@@ -76,55 +89,55 @@ public class LeapPageTurnerV2 : MonoBehaviour
     private void circleChecker()
     {
         //Check forward Gesture
-        if (RightHandgestureQue.getLastGesture() == "rightUp" && RightHandgestureQue.getOldGesture() == "leftUp" && RightHandgestureQue.getOldestGesture() == "leftDown")
+        if (gestureQue.getLastGesture() == "rightUp" && gestureQue.getOldGesture() == "leftUp" && gestureQue.getOldestGesture() == "leftDown")
         {
             book.NextPage(pageTurnSound);
-            probabilityTracker.increaseCircleMovement();
-            RightHandgestureQue.setOldestGesture("done");
+            probabilityTracker.increaseForwardCircle();
+            gestureQue.setOldestGesture("done");
         }
-        if (RightHandgestureQue.getLastGesture() == "rightDown" && RightHandgestureQue.getOldGesture() == "rightUp" && RightHandgestureQue.getOldestGesture() == "leftUp")
+        if (gestureQue.getLastGesture() == "rightDown" && gestureQue.getOldGesture() == "rightUp" && gestureQue.getOldestGesture() == "leftUp")
         {
             book.NextPage(pageTurnSound);
-            probabilityTracker.increaseCircleMovement();
-            RightHandgestureQue.setOldestGesture("done");
+            probabilityTracker.increaseForwardCircle();
+            gestureQue.setOldestGesture("done");
         }
-        if (RightHandgestureQue.getLastGesture() == "leftDown" && RightHandgestureQue.getOldGesture() == "rightDown" && RightHandgestureQue.getOldestGesture() == "rightUp")
+        if (gestureQue.getLastGesture() == "leftDown" && gestureQue.getOldGesture() == "rightDown" && gestureQue.getOldestGesture() == "rightUp")
         {
             book.NextPage(pageTurnSound);
-            probabilityTracker.increaseCircleMovement();
-            RightHandgestureQue.setOldestGesture("done");
+            probabilityTracker.increaseForwardCircle();
+            gestureQue.setOldestGesture("done");
         }
-        if (RightHandgestureQue.getLastGesture() == "leftUp" && RightHandgestureQue.getOldGesture() == "leftDown" && RightHandgestureQue.getOldestGesture() == "rightDown")
+        if (gestureQue.getLastGesture() == "leftUp" && gestureQue.getOldGesture() == "leftDown" && gestureQue.getOldestGesture() == "rightDown")
         {
             book.NextPage(pageTurnSound);
-            probabilityTracker.increaseCircleMovement();
-            RightHandgestureQue.setOldestGesture("done");
+            probabilityTracker.increaseForwardCircle();
+            gestureQue.setOldestGesture("done");
         }
 
         //Check backward gesture
-        if (RightHandgestureQue.getLastGesture() == "leftUp" && RightHandgestureQue.getOldGesture() == "rightUp" && RightHandgestureQue.getOldestGesture() == "rightDown")
+        if (gestureQue.getLastGesture() == "leftUp" && gestureQue.getOldGesture() == "rightUp" && gestureQue.getOldestGesture() == "rightDown")
         {
             book.PrevPage(pageTurnSound);
-            probabilityTracker.increaseCircleMovement();
-            RightHandgestureQue.setOldestGesture("done");
+            probabilityTracker.increaseBackwardCircle();
+            gestureQue.setOldestGesture("done");
         }
-        if (RightHandgestureQue.getLastGesture() == "rightUp" && RightHandgestureQue.getOldGesture() == "rightDown" && RightHandgestureQue.getOldestGesture() == "leftDown")
+        if (gestureQue.getLastGesture() == "rightUp" && gestureQue.getOldGesture() == "rightDown" && gestureQue.getOldestGesture() == "leftDown")
         {
             book.PrevPage(pageTurnSound);
-            probabilityTracker.increaseCircleMovement();
-            RightHandgestureQue.setOldestGesture("done");
+            probabilityTracker.increaseBackwardCircle();
+            gestureQue.setOldestGesture("done");
         }
-        if (RightHandgestureQue.getLastGesture() == "rightDown" && RightHandgestureQue.getOldGesture() == "leftDown" && RightHandgestureQue.getOldestGesture() == "leftUp")
+        if (gestureQue.getLastGesture() == "rightDown" && gestureQue.getOldGesture() == "leftDown" && gestureQue.getOldestGesture() == "leftUp")
         {
             book.PrevPage(pageTurnSound);
-            probabilityTracker.increaseCircleMovement();
-            RightHandgestureQue.setOldestGesture("done");
+            probabilityTracker.increaseBackwardCircle();
+            gestureQue.setOldestGesture("done");
         }
-        if (RightHandgestureQue.getLastGesture() == "leftDown" && RightHandgestureQue.getOldGesture() == "leftUp" && RightHandgestureQue.getOldestGesture() == "rightUp")
+        if (gestureQue.getLastGesture() == "leftDown" && gestureQue.getOldGesture() == "leftUp" && gestureQue.getOldestGesture() == "rightUp")
         {
             book.PrevPage(pageTurnSound);
-            probabilityTracker.increaseCircleMovement();
-            RightHandgestureQue.setOldestGesture("done");
+            probabilityTracker.increaseBackwardCircle();
+            gestureQue.setOldestGesture("done");
         }
 
     }
@@ -166,7 +179,7 @@ public class LeapPageTurnerV2 : MonoBehaviour
     /// <param name="currentHand"></param>
     /// <param name="oldHand"></param>
     /// <param name="leftOrRight"></param>
-    private void updateHandMovementProbability(Hand currentHand, Hand oldHand, string leftOrRight)
+    private void updateHandMovementProbability(Hand currentHand, Hand oldHand)
     {
         Vector currentHandPosition = currentHand.PalmPosition;
         Vector oldHandPosition = oldHand.PalmPosition;
@@ -174,109 +187,59 @@ public class LeapPageTurnerV2 : MonoBehaviour
         Vector distance = currentHand.PalmPosition - oldHand.PalmPosition;
 
         //LeftUp Gesture
-        if (currentHandPosition.x > oldHandPosition.x && currentHandPosition.z < oldHandPosition.z && distance.Magnitude > 1)
+        if (currentHandPosition.x > oldHandPosition.x && currentHandPosition.z < oldHandPosition.z && distance.Magnitude > ProbabilityDistanceThreshold)
         {
-            if (leftOrRight == "right")
-            {
                 probabilityTracker.increaseRightHandLeftUp();
-            }
-            if (leftOrRight == "left")
-            {
-                probabilityTracker.increaseLeftHandLeftUp();
-            }
         }
 
         else if (currentHandPosition.x > oldHandPosition.x || currentHandPosition.z < oldHandPosition.z)
         {
         }
         else {
-            if (leftOrRight == "right" && probabilityTracker.getRightHandLeftUp() != 0)
-            {
-                probabilityTracker.decreaseRightHandLeftUp();
-            }
-            if (leftOrRight == "left" && probabilityTracker.getLeftHandLeftUp() != 0)
-            {
-                probabilityTracker.decreaseLeftHandLeftUp();
-            }
 
+                probabilityTracker.decreaseRightHandLeftUp();
         }
 
         //rightUp Gesture
-        if (currentHandPosition.x < oldHandPosition.x && currentHandPosition.z < oldHandPosition.z && distance.Magnitude > 1)
+        if (currentHandPosition.x < oldHandPosition.x && currentHandPosition.z < oldHandPosition.z && distance.Magnitude > ProbabilityDistanceThreshold)
         {
-            if (leftOrRight == "right")
-            {
+
                 probabilityTracker.increaseRightHandRightUp();
-            }
-            if (leftOrRight == "left")
-            {
-                probabilityTracker.increaseLeftHandRightUp();
-            }
         }
         else if (currentHandPosition.x < oldHandPosition.x || currentHandPosition.z < oldHandPosition.z)
         {
         }
         else {
-            if (leftOrRight == "right" && probabilityTracker.getRightHandRightUp() != 0)
-            {
+
                 probabilityTracker.decreaseRightHandRightUp();
-            }
-            if (leftOrRight == "left" && probabilityTracker.getLeftHandRightUp() != 0)
-            {
-                probabilityTracker.decreaseLeftHandRightUp();
-            }
         }
 
         //rightDown
-        if (currentHandPosition.x < oldHandPosition.x && currentHandPosition.z > oldHandPosition.z && distance.Magnitude > 1)
+        if (currentHandPosition.x < oldHandPosition.x && currentHandPosition.z > oldHandPosition.z && distance.Magnitude > ProbabilityDistanceThreshold)
         {
-            if (leftOrRight == "right")
-            {
                 probabilityTracker.increaseRightHandRightDown();
-            }
-            if (leftOrRight == "left")
-            {
-                probabilityTracker.increaseLeftHandRightDown();
-            }
+
         }
         else if (currentHandPosition.x < oldHandPosition.x || currentHandPosition.z > oldHandPosition.z)
         {
         }
         else {
-            if (leftOrRight == "right" && probabilityTracker.getRightHandRightDown() != 0)
-            {
+
                 probabilityTracker.decreaseRightHandRightDown();
-            }
-            if (leftOrRight == "left" && probabilityTracker.getLeftHandRightDown() != 0)
-            {
-                probabilityTracker.decreaseLeftHandRightDown();
-            }
         }
 
         //leftDown
-        if (currentHandPosition.x > oldHandPosition.x && currentHandPosition.z > oldHandPosition.z && distance.Magnitude > 1)
+        if (currentHandPosition.x > oldHandPosition.x && currentHandPosition.z > oldHandPosition.z && distance.Magnitude > ProbabilityDistanceThreshold)
         {
-            if (leftOrRight == "right")
-            {
+
                 probabilityTracker.increaseRightHandLeftDown();
-            }
-            if (leftOrRight == "left")
-            {
-                probabilityTracker.increaseLeftHandLeftDown();
-            }
         }
         else if (currentHandPosition.x > oldHandPosition.x || currentHandPosition.z > oldHandPosition.z)
         {
         }
         else {
-            if (leftOrRight == "right" && probabilityTracker.getRightHandLeftDown() != 0)
-            {
+
                 probabilityTracker.decreaseRightHandLeftDown();
-            }
-            if (leftOrRight == "left" && probabilityTracker.getLeftHandLeftDown() != 0)
-            {
-                probabilityTracker.decreaseLeftHandLeftDown();
-            }
         }
     }
 
@@ -285,54 +248,52 @@ public class LeapPageTurnerV2 : MonoBehaviour
     /// </summary>
     /// <param name="currentHand"></param>
     /// <param name="veryOldHand"></param>
-    /// <param name="leftOrRight"></param>
-    private void updateGestureQue(Hand currentHand, Hand veryOldHand, string leftOrRight)
+    private void updateGestureQue(Hand currentHand, Hand veryOldHand)
     {
 
         Vector distance = currentHand.PalmPosition - veryOldHand.PalmPosition;
-        //Debug.Log(probabilityTracker.getRightHandRightUp());
 
         if (probabilityTracker.getRightHandLeftUp() > probabilityThreshold)
         {
-            if (distance.Magnitude > distanceThreshold)
+            if (distance.Magnitude > GestureDistanceThreshold)
             {
                 Debug.Log("leftUp");
                 probabilityTracker.nullRightHand();
                 circleForcaster("leftUp");
-                RightHandgestureQue.setLastGesture("leftUp");
+                gestureQue.setLastGesture("leftUp");
             }
         }
 
         if (probabilityTracker.getRightHandRightUp() > probabilityThreshold)
         {
-            if (distance.Magnitude > distanceThreshold)
+            if (distance.Magnitude > GestureDistanceThreshold)
             {
                 Debug.Log("rightUp");
                 probabilityTracker.nullRightHand();
                 circleForcaster("rightUp");
-                RightHandgestureQue.setLastGesture("rightUp");
+                gestureQue.setLastGesture("rightUp");
             }
         }
 
         if (probabilityTracker.getRightHandRightDown() > probabilityThreshold)
         {
-            if (distance.Magnitude > distanceThreshold)
+            if (distance.Magnitude > GestureDistanceThreshold)
             {
                 Debug.Log("rightDown");
                 probabilityTracker.nullRightHand();
                 circleForcaster("rightDown");
-                RightHandgestureQue.setLastGesture("rightDown");
+                gestureQue.setLastGesture("rightDown");
             }
         }
 
         if (probabilityTracker.getRightHandLeftDown() > probabilityThreshold)
         {
-            if (distance.Magnitude > distanceThreshold)
+            if (distance.Magnitude > GestureDistanceThreshold)
             {
                 Debug.Log("leftDown");
                 probabilityTracker.nullRightHand();
                 circleForcaster("leftDown");
-                RightHandgestureQue.setLastGesture("leftDown");
+                gestureQue.setLastGesture("leftDown");
             }
         }
     }
@@ -361,9 +322,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
             probabilityTracker.setRightHandRightDown(-10);
         }
 
-        if (RightHandgestureQue.getLastGesture() == "rightUp" && RightHandgestureQue.getOldGesture() == "leftUp")
+        if (gestureQue.getLastGesture() == "rightUp" && gestureQue.getOldGesture() == "leftUp")
         {
-            if (RightHandgestureQue.getOldestGesture() == "leftDown")
+            if (gestureQue.getOldestGesture() == "leftDown")
             {
                 probabilityTracker.setRightHandRightDown(8);
             }
@@ -372,9 +333,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
             }
 
         }
-        if (RightHandgestureQue.getLastGesture() == "rightDown" && RightHandgestureQue.getOldGesture() == "rightUp")
+        if (gestureQue.getLastGesture() == "rightDown" && gestureQue.getOldGesture() == "rightUp")
         {
-            if (RightHandgestureQue.getOldestGesture() == "leftUp")
+            if (gestureQue.getOldestGesture() == "leftUp")
             {
                 probabilityTracker.setRightHandLeftDown(8);
             }
@@ -382,9 +343,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
                 probabilityTracker.setRightHandLeftDown(5);
             }
         }
-        if (RightHandgestureQue.getLastGesture() == "leftDown" && RightHandgestureQue.getOldGesture() == "rightDown")
+        if (gestureQue.getLastGesture() == "leftDown" && gestureQue.getOldGesture() == "rightDown")
         {
-            if (RightHandgestureQue.getOldestGesture() == "rightUp")
+            if (gestureQue.getOldestGesture() == "rightUp")
             {
                 probabilityTracker.setRightHandLeftUp(8);
             }
@@ -393,9 +354,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
             }
             
         }
-        if (RightHandgestureQue.getLastGesture() == "leftUp" && RightHandgestureQue.getOldGesture() == "leftDown")
+        if (gestureQue.getLastGesture() == "leftUp" && gestureQue.getOldGesture() == "leftDown")
         {
-            if (RightHandgestureQue.getOldestGesture() == "rightDown")
+            if (gestureQue.getOldestGesture() == "rightDown")
             {
                 probabilityTracker.setRightHandRightUp(8);
             }
@@ -408,59 +369,57 @@ public class LeapPageTurnerV2 : MonoBehaviour
     }
 
     /// <summary>
-    /// Still beta till now... Experimenting with that.
+    // 
     /// </summary>
     /// <param name="currentHand"></param>
-   // private int testSize = 20;
     public void fastPageTurnChecker(Hand currentHand)
     {
-        //Add to a list to get the average hand speed, also using magnitude, for all dimensions. 
-            Vector palmVelocity = currentHand.PalmVelocity;
-        
-            speedList.Add(palmVelocity.Magnitude);
-            if (speedList.Count >= speedList.Capacity - 1)
-            {
-                speedList.RemoveAt(0);
-            }
-        //  if (probabilityTracker.getCircleMovement() > 2)
-        //    {
-        //Debug.Log(speedList.Count + " Durrr " + (speedList.Capacity - 1));
-            if (speedList.Count >= speedList.Capacity - 1)
-            {
-                float estimatedSpeed = 0;
-                for(int i = 0; i < speedList.Capacity - 1; i++)
-                {
-                    estimatedSpeed += speedList[i];
-                }
-            estimatedSpeed = estimatedSpeed / speedList.Capacity - 1;
-            estimatedSpeed -= 400;
-            estimatedSpeed=  estimatedSpeed/200;
-            int speed = Mathf.RoundToInt(estimatedSpeed);
-            if (speed < 1)
-                speed = 1;
-            Debug.Log(speed);
-            }
-        
-    /*        else if ((palmVelocity.x > 800 || palmVelocity.x < -800) && probabilityTracker.getCircleMovement() > 2)
-            {
-                if (fastForwardTimerActive == false)
-                {
-                    initilizeFastForwardTimer();
-                    fastForwardTimerActive = true;
-                    Debug.Log("fast forward");
-                }
-                if (fastForward == true)
-                {
-                    fastForward = false;
-                    book.NextPage(pageTurnSound);
-                }
-            }*/
-   //     }
+        float handSpeed=0;
+        speedQue.Dequeue();
+        speedQue.Enqueue(currentHand.PalmVelocity.Magnitude);
 
-        if (probabilityTracker.getCircleMovement() == 0 && fastForwardTimer != null)
+        foreach (float speedValue in speedQue) {
+            handSpeed = handSpeed + speedValue;
+        }
+
+        if (probabilityTracker.getForwardCircle() > circleProbabilityThreshhold && handSpeed > fastPageTurnSpeedThreshold) {
+            if (fastForwardActive == false && fastBackwardActive == false)
+            {
+                initilizeFastPageTurnTimer();
+                probabilityTracker.setForwardCircle(0);
+                fastForwardActive = true;
+                Debug.Log("fast forward");
+            }
+        }
+
+        if (probabilityTracker.getBackwardCircle() > circleProbabilityThreshhold && handSpeed > fastPageTurnSpeedThreshold)
         {
-            fastForwardTimer.Close();
-            fastForwardTimerActive = false;
+            if (fastForwardActive == false && fastBackwardActive == false)
+            {
+                initilizeFastPageTurnTimer();
+                probabilityTracker.setBackwardCircle(0);
+                fastBackwardActive = true;
+                Debug.Log("fast backward");
+            }
+        }
+
+        if (fastPageTurn == true && fastForwardActive == true)
+        {
+            fastPageTurn = false;
+            book.NextPage(pageTurnSound);
+        }
+
+        if (fastPageTurn == true && fastBackwardActive == true)
+        {
+            fastPageTurn = false;
+            book.PrevPage(pageTurnSound);
+        }
+
+        if (handSpeed < 8000 && fastPageTurnTimer != null)
+        {
+            fastPageTurnTimer.Close();
+            fastForwardActive = false;
+            fastBackwardActive = false;
         }
 
     }
@@ -475,18 +434,13 @@ public class LeapPageTurnerV2 : MonoBehaviour
         Hand rightVeryOldHand = getHand(10, "right");
         Hand rightOldHand = getHand(2, "right");
 
-        Hand leftCurrentHand = getHand(0, "left");
-        Hand leftVeryOldHand = getHand(10, "left");
-        Hand leftOldHand = getHand(1, "left");
-
         if (rightCurrentHand != null && rightVeryOldHand != null && rightOldHand != null)
         {
 
-            updateHandMovementProbability(rightCurrentHand, rightOldHand, "right");
-            updateGestureQue(rightCurrentHand, rightVeryOldHand, "right");
+            updateHandMovementProbability(rightCurrentHand, rightOldHand);
+            updateGestureQue(rightCurrentHand, rightVeryOldHand);
             fastPageTurnChecker(rightCurrentHand);
             circleChecker();
-            Debug.Log(probabilityTracker.getCircleMovement());
         }
 
     }
