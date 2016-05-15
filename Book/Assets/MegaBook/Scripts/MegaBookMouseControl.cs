@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 
+
 // Very simple script to allow mouse clicks to turn pages
 
 
@@ -17,13 +18,21 @@ public class MegaBookMouseControl : MonoBehaviour
     public AudioSource pageTurnSound;
     public bool forward = true;
     public ArrayList toMove = new ArrayList();
- 
+   /* private Text pageNumberText;
     
+    void Start()
+    {
+        GameObject GUICanvas = book.transform.parent.transform.FindChild("SpeedCanvas").transform.gameObject;
+        pageNumberText = GUICanvas.transform.FindChild("Text").GetComponent<Text>();
+        pageNumberText.text = "";
+       
+    }*/
 
     void Update()
     {
         if (book)
         {
+            //pageNumberText.text = "" + (int) book.GetPage();
             if (Input.GetMouseButtonDown(0))
             {
                 if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))

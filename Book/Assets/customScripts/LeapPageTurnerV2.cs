@@ -20,6 +20,12 @@ public class LeapPageTurnerV2 : MonoBehaviour
     private bool fastForward = false;
     private bool fastForwardTimerActive = false;
 
+    //the next two variables are used in updateGestureQue as thresholds.
+    public int probabilityThreshold = 14;
+    public int distanceThreshold = 27;
+    //Number of elements saved for speed estimation, -1, so if it is 21 it is actually 20.
+    private List<float> speedList = new List<float>(21);
+
     public LeapPageTurnerV2(MegaBookBuilder book, Leap.Controller controller, AudioSource pageTurnSound)
     {
         this.book = book;
@@ -283,9 +289,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
 
         Vector distance = currentHand.PalmPosition - veryOldHand.PalmPosition;
 
-        if (probabilityTracker.getRightHandLeftUp() > 14)
+        if (probabilityTracker.getRightHandLeftUp() > probabilityThreshold)
         {
-            if (distance.Magnitude > 27)
+            if (distance.Magnitude > distanceThreshold)
             {
                 Debug.Log("leftUp");
                 probabilityTracker.nullRightHand();
@@ -294,9 +300,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
             }
         }
 
-        if (probabilityTracker.getRightHandRightUp() > 14)
+        if (probabilityTracker.getRightHandRightUp() > probabilityThreshold)
         {
-            if (distance.Magnitude > 27)
+            if (distance.Magnitude > distanceThreshold)
             {
                 Debug.Log("rightUp");
                 probabilityTracker.nullRightHand();
@@ -305,9 +311,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
             }
         }
 
-        if (probabilityTracker.getRightHandRightDown() > 14)
+        if (probabilityTracker.getRightHandRightDown() > probabilityThreshold)
         {
-            if (distance.Magnitude > 27)
+            if (distance.Magnitude > distanceThreshold)
             {
                 Debug.Log("rightDown");
                 probabilityTracker.nullRightHand();
@@ -316,9 +322,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
             }
         }
 
-        if (probabilityTracker.getRightHandLeftDown() > 14)
+        if (probabilityTracker.getRightHandLeftDown() > probabilityThreshold)
         {
-            if (distance.Magnitude > 27)
+            if (distance.Magnitude > distanceThreshold)
             {
                 Debug.Log("leftDown");
                 probabilityTracker.nullRightHand();
@@ -402,28 +408,51 @@ public class LeapPageTurnerV2 : MonoBehaviour
     /// Still beta till now... Experimenting with that.
     /// </summary>
     /// <param name="currentHand"></param>
+   // private int testSize = 20;
     public void fastPageTurnChecker(Hand currentHand)
     {
-        Vector palmVelocity = currentHand.PalmVelocity;
-
-        if ((palmVelocity.x > 1100 || palmVelocity.x < -1100) && probabilityTracker.getCircleMovement() > 2)
-        {
-            //Debug.Log("ultra fast Forward");
-        }
-        else if ((palmVelocity.x > 800 || palmVelocity.x < -800) && probabilityTracker.getCircleMovement() > 2)
-        {
-            if (fastForwardTimerActive == false)
+        //Add to a list to get the average hand speed, also using magnitude, for all dimensions. 
+            Vector palmVelocity = currentHand.PalmVelocity;
+        
+            speedList.Add(palmVelocity.Magnitude);
+            if (speedList.Count >= speedList.Capacity - 1)
             {
-                initilizeFastForwardTimer();
-                fastForwardTimerActive = true;
-                Debug.Log("fast forward");
+                speedList.RemoveAt(0);
             }
-            if (fastForward == true)
+        //  if (probabilityTracker.getCircleMovement() > 2)
+        //    {
+        Debug.Log(speedList.Count + " Durrr " + (speedList.Capacity - 1));
+            if (speedList.Count >= speedList.Capacity - 1)
             {
-                fastForward = false;
-                book.NextPage(pageTurnSound);
+                float estimatedSpeed = 0;
+                for(int i = 0; i < speedList.Capacity - 1; i++)
+                {
+                    estimatedSpeed += speedList[i];
+                }
+            estimatedSpeed = estimatedSpeed / speedList.Capacity - 1;
+            estimatedSpeed -= 400;
+            estimatedSpeed=  estimatedSpeed/200;
+            int speed = Mathf.RoundToInt(estimatedSpeed);
+            if (speed < 1)
+                speed = 1;
+            Debug.Log(speed);
             }
-        }
+        
+    /*        else if ((palmVelocity.x > 800 || palmVelocity.x < -800) && probabilityTracker.getCircleMovement() > 2)
+            {
+                if (fastForwardTimerActive == false)
+                {
+                    initilizeFastForwardTimer();
+                    fastForwardTimerActive = true;
+                    Debug.Log("fast forward");
+                }
+                if (fastForward == true)
+                {
+                    fastForward = false;
+                    book.NextPage(pageTurnSound);
+                }
+            }*/
+   //     }
 
         if (probabilityTracker.getCircleMovement() == 0 && fastForwardTimer != null)
         {
