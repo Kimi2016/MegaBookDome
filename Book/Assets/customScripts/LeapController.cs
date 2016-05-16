@@ -22,6 +22,7 @@ public class LeapController : MonoBehaviour
     private LeapPageTurner leapPageTurner;
     private LeapDragAndDrop leapDragAndDrop;
     private LeapPageTurnerV2 leapPageTurnerV2;
+    private bool notTapping = true;
 
     void Start()
     {
@@ -62,6 +63,7 @@ public class LeapController : MonoBehaviour
             if (hand.IsRight)
             {
                 DragAndDropChecker(hand);
+                TapChecker(hand);
                 //leapDragAndDrop.CheckDragAndDropGesture(hand);
             }
             if (!pictureCurrentlyDragged && hand.GrabStrength > 0.7)
@@ -82,6 +84,34 @@ public class LeapController : MonoBehaviour
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void TapChecker(Hand hand)
+    {
+        if (hand.GrabStrength < 0.4 && hand.PalmNormal.y < -0.7) // && hand.)
+        {
+            // Debug.Log(hand.PalmNormal);
+            if (hand.Fingers[1].TipVelocity.y - hand.Fingers[3].TipVelocity.y < -0.4f && notTapping)
+            {
+                Ray ray;
+                RaycastHit hit;
+                ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out hit))
+                {
+                        if (hit.collider.tag == "pic")
+                        {
+                        hit.transform.GetComponent<PictureDrag>().selectNDeselPic();
+                        }
+                }
+
+                notTapping = false;
+            }
+            else if (hand.Fingers[1].TipVelocity.y - hand.Fingers[3].TipVelocity.y > 0.3f && !notTapping)
+            {
+                notTapping = true;
             }
         }
     }
@@ -129,20 +159,27 @@ public class LeapController : MonoBehaviour
             {
                 //Debug.Log("Grab detected... strength is:" + grabStrength);
                 Vector3 unityLeap = rightHand.PalmPosition.ToUnity();
-                foreach (GameObject pic in GameObject.FindGameObjectWithTag("pic").GetComponent<PictureDrag>().getCreatedObjects())
+                try
                 {
-                    Vector3 distance = unityLeap - pic.transform.position;
-                    //Debug.Log("distance is " + distance.magnitude);
-                    if (distance.magnitude < 0.7)
+                    foreach (GameObject pic in GameObject.FindGameObjectWithTag("pic").GetComponent<PictureDrag>().getCreatedObjects())
                     {
-                        pictureCurrentlyDragged = true;
-                        picturePosition.x = rightHand.PalmPosition.x;
-                        picturePosition.z = rightHand.PalmPosition.z;
-                        picturePosition.y = rightHand.PalmPosition.y - 0.2f;
-                        pic.transform.position = picturePosition;
-                        pic.GetComponent<PictureDrag>().setAsFirstInList(pic);
-                        return;
+                        Vector3 distance = unityLeap - pic.transform.position;
+                        //Debug.Log("distance is " + distance.magnitude);
+                        if (distance.magnitude < 0.7)
+                        {
+                            pictureCurrentlyDragged = true;
+                            picturePosition.x = rightHand.PalmPosition.x;
+                            picturePosition.z = rightHand.PalmPosition.z;
+                            picturePosition.y = rightHand.PalmPosition.y - 0.2f;
+                            pic.transform.position = picturePosition;
+                            pic.GetComponent<PictureDrag>().setAsFirstInList(pic);
+                            return;
+                        }
                     }
+                }
+                catch
+                {
+
                 }
             }
         }
