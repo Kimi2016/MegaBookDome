@@ -1,27 +1,23 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 //attached to collider within the book.
 
 
-public class PageCollider : MonoBehaviour {
-
+public class PageCollider : MonoBehaviour
+{
     public MegaBookBuilder book;
     public bool next;
     public MegaBookMouseControl mouseController;
 
     void OnTriggerEnter(Collider other)
     {
-
         if (other.gameObject.CompareTag("pic"))
         {
             PictureDrag pd = other.gameObject.GetComponent<PictureDrag>();
 
-            int pageNum = (int) book.GetPage();
+            int pageNum = (int)book.GetPage();
             if (!pd.getIsInList())
-            {
                 setPage(other.gameObject, pageNum, next);
-            }
             else if (pd.getIsInList())
             {
                 bool front = next;
@@ -31,9 +27,7 @@ public class PageCollider : MonoBehaviour {
                     do
                     {
                         done = setPage(value, pageNum, front);
-
                         front = !front;
-
                         if (!front)
                             pageNum++;
                     } while (!done);
@@ -50,7 +44,6 @@ public class PageCollider : MonoBehaviour {
         {
             if (mouseController.getStandardTexture(front) != book.GetPageTexture(pageNum, front))
                 return false;
-
 
             Renderer renderer = obj.GetComponent<Renderer>();
             Texture2D texture = renderer.material.GetTexture("_MainTex") as Texture2D;

@@ -18,15 +18,20 @@ public class MegaBookMouseControl : MonoBehaviour
     public AudioSource pageTurnSound;
     public bool forward = true;
     public ArrayList toMove = new ArrayList();
-   /* private Text pageNumberText;
-    
+    private SpeedONeedle needle;
+    /* private Text pageNumberText;
+
+     void Start()
+     {
+         GameObject GUICanvas = book.transform.parent.transform.FindChild("SpeedCanvas").transform.gameObject;
+         pageNumberText = GUICanvas.transform.FindChild("Text").GetComponent<Text>();
+         pageNumberText.text = "";
+
+     }*/
     void Start()
     {
-        GameObject GUICanvas = book.transform.parent.transform.FindChild("SpeedCanvas").transform.gameObject;
-        pageNumberText = GUICanvas.transform.FindChild("Text").GetComponent<Text>();
-        pageNumberText.text = "";
-       
-    }*/
+        this.needle = book.transform.parent.Find("SpeedCanvas").transform.Find("SpeedDial").GetChild(0).GetComponent<SpeedONeedle>();
+    }
 
     void Update()
     {
@@ -56,10 +61,16 @@ public class MegaBookMouseControl : MonoBehaviour
                     if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
                     {
                         if (hit.collider == prevcollider)
+                        {
                             book.PrevPage(pageTurnSound);
+                            needle.AddSpeed(1);
+                        }
 
                         if (hit.collider == nextcollider)
+                        {
                             book.NextPage(pageTurnSound);
+                            needle.AddSpeed(1);
+                        }
 
                     }
                 }

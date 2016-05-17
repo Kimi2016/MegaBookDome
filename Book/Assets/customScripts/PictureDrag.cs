@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 //Attach to picture you want to drag.
 
-public class PictureDrag : MonoBehaviour {
+public class PictureDrag : MonoBehaviour
+{
     Vector3 dist;
     float posX;
     float posY;
@@ -26,16 +27,17 @@ public class PictureDrag : MonoBehaviour {
         }
     }
 
-        void OnMouseDown() {
+    void OnMouseDown()
+    {
         if (isInList)
         {
-            foreach(GameObject value in selectedPicture)
-            value.GetComponent<PictureDrag>().mouseDown();
+            foreach (GameObject value in selectedPicture)
+                value.GetComponent<PictureDrag>().mouseDown();
         }
         else
             mouseDown();
     }
-    
+
     //Action to call when OnMouseDown is called.
     public void mouseDown()
     {
@@ -44,7 +46,8 @@ public class PictureDrag : MonoBehaviour {
         posY = Input.mousePosition.y - dist.y;
     }
 
-    void OnMouseDrag() {
+    void OnMouseDrag()
+    {
         if (selectedPicture.Contains(this.gameObject))
         {
             foreach (GameObject value in selectedPicture)
@@ -69,26 +72,29 @@ public class PictureDrag : MonoBehaviour {
             selectNDeselPic();
         }
     }
-
-    //If it retruns true it is added to the list, false for removed.
+    
+    /// <summary>
+    /// If it retruns true it is added to the list, false for removed.
+    /// </summary>
+    /// <returns></returns>
     public bool selectNDeselPic()
-        {
+    {
         if (!selectedPicture.Contains(this.gameObject))
-            {
-                selectedPicture.Add(this.gameObject);
-                isInList = true;
+        {
+            selectedPicture.Add(this.gameObject);
+            isInList = true;
 
-                this.gameObject.GetComponent<Renderer>().material.EnableKeyword("_NORMALMAP");
-                return true;
-            }
-            else
-            {
-                selectedPicture.Remove(this.gameObject);
-                isInList = false;
-                this.gameObject.GetComponent<Renderer>().material.DisableKeyword("_NORMALMAP");
-                return false;
-            }
-       }
+            this.gameObject.GetComponent<Renderer>().material.EnableKeyword("_NORMALMAP");
+            return true;
+        }
+        else
+        {
+            selectedPicture.Remove(this.gameObject);
+            isInList = false;
+            this.gameObject.GetComponent<Renderer>().material.DisableKeyword("_NORMALMAP");
+            return false;
+        }
+    }
 
     //Remove the object from both lists.
     void OnDestroy()

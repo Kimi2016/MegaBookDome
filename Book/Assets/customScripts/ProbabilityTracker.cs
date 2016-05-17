@@ -18,7 +18,8 @@ public class ProbabilityTracker
         forwardCircle--;
     }
 
-    public void setForwardCircle(int setTo) {
+    public void setForwardCircle(int setTo)
+    {
         forwardCircle = setTo;
     }
 
@@ -98,28 +99,23 @@ public class ProbabilityTracker
             rightHandLeftDown--;
     }
 
-
-
+    
     //setters
     public void setRightHandLeftUp(int rightHandLeftUp)
     {
         this.rightHandLeftUp = rightHandLeftUp;
-
     }
     public void setRightHandRightUp(int rightHandRightUp)
     {
         this.rightHandRightUp = rightHandRightUp;
-
     }
     public void setRightHandRightDown(int rightHandRightDown)
     {
         this.rightHandRightDown = rightHandRightDown;
-
     }
     public void setRightHandLeftDown(int rightHandLeftDown)
     {
         this.rightHandLeftDown = rightHandLeftDown;
-
     }
 
 

@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 using Leap;
-using LeapInternal;
-using System;
-using System.Threading;
+using System.Timers;
+
 
 public class LeapController : MonoBehaviour
 {
@@ -19,14 +17,15 @@ public class LeapController : MonoBehaviour
     public AudioSource pageTurnSoundFast;
     private Vector3 picturePosition;
     bool pictureCurrentlyDragged;
-    private LeapPageTurner leapPageTurner;
+   //private LeapPageTurner leapPageTurner;
     private LeapDragAndDrop leapDragAndDrop;
     private LeapPageTurnerV2 leapPageTurnerV2;
     private bool notTapping = true;
+    private bool notTappingNTimer = true;
+    private Timer tapTimer;
 
     void Start()
     {
-
         pictureCurrentlyDragged = false;
         controller = new Controller();
         leapProvider = FindObjectOfType<LeapProvider>() as LeapProvider;
@@ -39,7 +38,7 @@ public class LeapController : MonoBehaviour
             Debug.Log("Device connected, continue");
 
         }
-        leapPageTurner = new LeapPageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
+     //   leapPageTurner = new LeapPageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
         leapDragAndDrop = new LeapDragAndDrop(leapProvider);
         leapPageTurnerV2 = new LeapPageTurnerV2(book, controller, pageTurnSoundSlow);
     }
@@ -93,7 +92,7 @@ public class LeapController : MonoBehaviour
         if (hand.GrabStrength < 0.4 && hand.PalmNormal.y < -0.7) // && hand.)
         {
             // Debug.Log(hand.PalmNormal);
-            if (hand.Fingers[1].TipVelocity.y - hand.Fingers[3].TipVelocity.y < -0.4f && notTapping)
+            if (hand.Fingers[1].TipVelocity.y - hand.Fingers[3].TipVelocity.y < -0.4f && notTappingNTimer)
             {
                 Ray ray;
                 RaycastHit hit;
@@ -106,13 +105,30 @@ public class LeapController : MonoBehaviour
                         hit.transform.GetComponent<PictureDrag>().selectNDeselPic();
                         }
                 }
-
                 notTapping = false;
+                notTappingNTimer = false;
+                initializeSpeedDecrease();
             }
-            else if (hand.Fingers[1].TipVelocity.y - hand.Fingers[3].TipVelocity.y > 0.3f && !notTapping)
+            else if (hand.Fingers[1].TipVelocity.y - hand.Fingers[3].TipVelocity.y > 0.3f && !notTappingNTimer)
             {
                 notTapping = true;
             }
+        }
+    }
+
+    private void initializeSpeedDecrease()
+    {
+        tapTimer = new Timer(1000); //Set Timer intervall 
+        tapTimer.Elapsed += tapTimerReset; // Hook up the method to the timer
+        tapTimer.Enabled = true;
+    }
+
+    void tapTimerReset(object sender, ElapsedEventArgs e)
+    {
+        if(notTapping)
+        {
+            notTappingNTimer = true;
+            tapTimer.Enabled = false;
         }
     }
 
@@ -184,5 +200,4 @@ public class LeapController : MonoBehaviour
             }
         }
     }
-
 }
