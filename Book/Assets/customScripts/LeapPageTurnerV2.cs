@@ -22,9 +22,9 @@ public class LeapPageTurnerV2 : MonoBehaviour
     //the next two variables are used in updateGestureQue as thresholds.
     private int probabilityThreshold = 13;
     private int GestureDistanceThreshold = 27;
-    private int circleProbabilityThreshhold = 6;
+    private int circleProbabilityThreshhold = 3;
     private int ProbabilityDistanceThreshold = 1;
-    private int fastPageTurnSpeedThreshold = 9000;
+    private int fastPageTurnSpeedThreshold = 10000;
     private Queue<float> speedQue = new Queue<float>();
 
     public LeapPageTurnerV2(MegaBookBuilder book, Leap.Controller controller, AudioSource pageTurnSound)
@@ -327,10 +327,11 @@ public class LeapPageTurnerV2 : MonoBehaviour
     }
 
     /// <summary>
-    // 
+    /// Returns the speed of the Hand. The speed is determined by the last 10 Frames.
     /// </summary>
     /// <param name="currentHand"></param>
-    public void fastPageTurnChecker(Hand currentHand)
+    /// <returns></returns>
+    private float getHandSpeed(Hand currentHand)
     {
         float handSpeed = 0;
         speedQue.Dequeue();
@@ -341,25 +342,56 @@ public class LeapPageTurnerV2 : MonoBehaviour
             handSpeed = handSpeed + speedValue;
         }
 
-        if (probabilityTracker.getForwardCircle() > circleProbabilityThreshhold && handSpeed > fastPageTurnSpeedThreshold)
+        return handSpeed;
+    }
+
+    /// <summary>
+    /// Function sets the page turn speed of the book, according to the speed of the hand.
+    /// </summary>
+    /// <param name="currentHand"></param>
+    private void setPageTurnSpeed(Hand currentHand)
+    {
+        float handSpeed = getHandSpeed(currentHand);
+        if (handSpeed < 4000)
         {
+            book.SetTurnTime(0.8f);
+        }
+        if (handSpeed > 4000)
+        {
+            book.SetTurnTime(0.2f);
+        }
+    }
+
+    /// <summary>
+    //  Function triggers fast page turns if the hand velocity is higher as an specific threshold AND if the user is doing a circle gesture.
+    /// </summary>
+    /// <param name="currentHand"></param>
+    private void fastPageTurnChecker(Hand currentHand)
+    {
+        float handSpeed = getHandSpeed(currentHand);
+
+        if (probabilityTracker.getForwardCircle() >= circleProbabilityThreshhold && handSpeed > fastPageTurnSpeedThreshold)
+        {
+            
             if (fastForwardActive == false && fastBackwardActive == false)
             {
+                Debug.Log("fast forward");
                 initilizeFastPageTurnTimer();
                 probabilityTracker.setForwardCircle(0);
                 fastForwardActive = true;
-                Debug.Log("fast forward");
+                
             }
         }
 
-        if (probabilityTracker.getBackwardCircle() > circleProbabilityThreshhold && handSpeed > fastPageTurnSpeedThreshold)
+        if (probabilityTracker.getBackwardCircle() >= circleProbabilityThreshhold && handSpeed > fastPageTurnSpeedThreshold)
         {
             if (fastForwardActive == false && fastBackwardActive == false)
             {
+                Debug.Log("fast backward");
                 initilizeFastPageTurnTimer();
                 probabilityTracker.setBackwardCircle(0);
                 fastBackwardActive = true;
-                Debug.Log("fast backward");
+               
             }
         }
 
@@ -377,7 +409,7 @@ public class LeapPageTurnerV2 : MonoBehaviour
             needle.AddSpeed(1);
         }
 
-        if (handSpeed < 8000 && fastPageTurnTimer != null)
+        if (handSpeed < 5000 && fastPageTurnTimer != null)
         {
             fastPageTurnTimer.Close();
             fastForwardActive = false;
@@ -399,6 +431,7 @@ public class LeapPageTurnerV2 : MonoBehaviour
         if (rightCurrentHand != null && rightVeryOldHand != null && rightOldHand != null)
         {
 
+            setPageTurnSpeed(rightCurrentHand);
             updateHandMovementProbability(rightCurrentHand, rightOldHand);
             updateGestureQue(rightCurrentHand, rightVeryOldHand);
             fastPageTurnChecker(rightCurrentHand);

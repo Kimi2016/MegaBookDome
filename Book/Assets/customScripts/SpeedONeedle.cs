@@ -59,8 +59,10 @@ public class SpeedONeedle : MonoBehaviour {
     /// <param name="speed"></param>
     internal void AddSpeed(int speed)
     {
+        /*
         this.speed += speed;
         if (!speedDecreaseTimer.Enabled)
             initializeSpeedDecrease();
+        */
     }
 }
