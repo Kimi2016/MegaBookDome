@@ -371,14 +371,19 @@ public class LeapPageTurnerV2 : MonoBehaviour
         float handSpeed = getHandSpeed(currentHand);
         if (handSpeed < 8000)
         {
-            book.SetTurnTime(0.8f);
+            book.SetTurnTime(0.6f);
         }
         if (handSpeed > 8000)
         {
             book.SetTurnTime(0.2f);
         }
         if (handSpeed < 6000) {
+            book.SetTurnTime(1f);
+        }
+        if (handSpeed < 3000)
+        {
             book.SetTurnTime(2f);
+
         }
     }
 
