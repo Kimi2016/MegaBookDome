@@ -12,6 +12,7 @@ public class LeapPageTurnerV2 : MonoBehaviour
     private Leap.Controller controller;
     private GestureQueV2 gestureQue = new GestureQueV2();
     private ProbabilityTracker probabilityTracker = new ProbabilityTracker();
+    private GestureReporter gestureReporter = new GestureReporter();
     private Timer circleProbabilityTimer;
     private Timer fastPageTurnTimer;
     private bool fastPageTurn = false;
@@ -23,8 +24,8 @@ public class LeapPageTurnerV2 : MonoBehaviour
     private int probabilityThreshold = 13;
     private int GestureDistanceThreshold = 27;
     private int circleProbabilityThreshhold = 3;
-    private int ProbabilityDistanceThreshold = 1;
-    private int fastPageTurnSpeedThreshold = 10000;
+    private int ProbabilityDistanceThreshold = 2;
+    private int fastPageTurnSpeedThreshold = 20000;
     private Queue<float> speedQue = new Queue<float>();
 
     public LeapPageTurnerV2(MegaBookBuilder book, Leap.Controller controller, AudioSource pageTurnSound)
@@ -248,7 +249,23 @@ public class LeapPageTurnerV2 : MonoBehaviour
             Debug.Log(dir);
             probabilityTracker.nullRightHand();
             circleForcaster(dir);
+            reportGesture(dir);
             gestureQue.setLastGesture(dir);
+        }
+    }
+
+    /// <summary>
+    /// Determines wether the gesture was done during forward or backward circle and reports the direction to the GestureReporter object.
+    /// </summary>
+    /// <param name="direction"></param>
+    private void reportGesture(string direction) {
+        if (probabilityTracker.getBackwardCircle() > probabilityTracker.getForwardCircle())
+        {
+            gestureReporter.increaseGestureCount(direction, "Backward");
+        }
+        if (probabilityTracker.getBackwardCircle() < probabilityTracker.getForwardCircle())
+        {
+            gestureReporter.increaseGestureCount(direction, "Forward");
         }
     }
 
@@ -280,7 +297,7 @@ public class LeapPageTurnerV2 : MonoBehaviour
         {
             if (gestureQue.getOldestGesture() == "leftDown")
             {
-                probabilityTracker.setRightHandRightDown(8);
+                probabilityTracker.setRightHandRightDown(10);
             }
             else
             {
@@ -292,7 +309,7 @@ public class LeapPageTurnerV2 : MonoBehaviour
         {
             if (gestureQue.getOldestGesture() == "leftUp")
             {
-                probabilityTracker.setRightHandLeftDown(8);
+                probabilityTracker.setRightHandLeftDown(10);
             }
             else
             {
@@ -303,7 +320,7 @@ public class LeapPageTurnerV2 : MonoBehaviour
         {
             if (gestureQue.getOldestGesture() == "rightUp")
             {
-                probabilityTracker.setRightHandLeftUp(8);
+                probabilityTracker.setRightHandLeftUp(10);
             }
             else
             {
@@ -315,7 +332,7 @@ public class LeapPageTurnerV2 : MonoBehaviour
         {
             if (gestureQue.getOldestGesture() == "rightDown")
             {
-                probabilityTracker.setRightHandRightUp(8);
+                probabilityTracker.setRightHandRightUp(10);
             }
             else
             {
@@ -352,13 +369,16 @@ public class LeapPageTurnerV2 : MonoBehaviour
     private void setPageTurnSpeed(Hand currentHand)
     {
         float handSpeed = getHandSpeed(currentHand);
-        if (handSpeed < 4000)
+        if (handSpeed < 8000)
         {
             book.SetTurnTime(0.8f);
         }
-        if (handSpeed > 4000)
+        if (handSpeed > 8000)
         {
             book.SetTurnTime(0.2f);
+        }
+        if (handSpeed < 6000) {
+            book.SetTurnTime(2f);
         }
     }
 

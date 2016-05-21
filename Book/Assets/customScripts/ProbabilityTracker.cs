@@ -10,7 +10,7 @@ public class ProbabilityTracker
     private int backwardCircle = 0;
 
     public int getForwardCircle()
-    {
+    {   
         return forwardCircle;
     }
     public void decreaseForwardCircle()
