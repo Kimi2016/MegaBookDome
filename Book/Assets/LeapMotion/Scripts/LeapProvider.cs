@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using LeapInternal;
-using Leap;
 
 namespace Leap {
   public class LeapProvider :

@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
 using Leap;
 using System.Collections.Generic;
 using System.Timers;
@@ -97,7 +95,8 @@ public class LeapPageTurner : MonoBehaviour
         {
             fastPageTurnerTimer.Close();
         }
-        else {
+        else
+        {
             turnNextPage = true;
         }
     }
@@ -123,7 +122,7 @@ public class LeapPageTurner : MonoBehaviour
 
     private void CheckStopGesture(Hand hand)
     {
- 
+
         if (hand.GrabStrength > 0.8)
         {
             if (turnForward || turnBackward)
@@ -135,7 +134,8 @@ public class LeapPageTurner : MonoBehaviour
             }
 
         }
-        else {
+        else
+        {
             if (grabbing)
             {
                 checkStopGestureEnabled = false;
@@ -161,8 +161,8 @@ public class LeapPageTurner : MonoBehaviour
         Finger triggerFingerLeft = null;
         float oldTriggerFingerDirectionRightX = 0;
         float oldTriggerFingerDirectionLeftX = 0;
-        Finger pinkyRight = null;
-        Finger pinkyLeft = null;
+        //     Finger pinkyRight = null;
+        //     Finger pinkyLeft = null;
         float oldPinkyDirectionRightX = 0;
         float oldPinkyDirectionLeftX = 0;
 

@@ -50,10 +50,8 @@ public class MegaBookBuilderEditor : Editor
 					page.back = (Texture2D)Resources.Load("Textures/MegaBook Back", typeof(Texture2D));
 				}
 			}
-
 			book.pageparams.Add(page);
 		}
-
 		go.transform.position = pos;
 		Selection.activeObject = go;
 		book.rebuild = true;

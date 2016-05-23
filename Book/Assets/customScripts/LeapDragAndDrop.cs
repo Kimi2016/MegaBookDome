@@ -16,18 +16,19 @@ public class LeapDragAndDrop : MonoBehaviour
         this.leapProvider = leapProvider;
     }
 
+    /// <summary>
+    /// Return the hand if it is the right, else null.
+    /// </summary>
+    /// <returns></returns>
     private Hand GetRightHand()
     {
-        Hand rightHand = null;
         Frame frame = leapProvider.CurrentFrame;
         foreach (Hand hand in frame.Hands)
         {
             if (hand.IsRight)
-            {
-                rightHand = hand;
-            }
+                return hand;
         }
-        return rightHand;
+        return null;
     }
 
     /// <summary>
