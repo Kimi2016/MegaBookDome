@@ -19,6 +19,7 @@ public class PictureDrag : MonoBehaviour
         createdPictures.Add(this.gameObject);
     }
 
+    /*
     void Update()
     {
         if (Input.GetMouseButtonDown(1) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
@@ -72,14 +73,15 @@ public class PictureDrag : MonoBehaviour
             selectNDeselPic();
         }
     }
-    
+    */
+
     /// <summary>
     /// If it retruns true it is added to the list, false for removed.
     /// </summary>
     /// <returns></returns>
     public bool selectNDeselPic()
     {
-        if (!selectedPicture.Contains(this.gameObject))
+        if (!isInList)
         {
             selectedPicture.Add(this.gameObject);
             isInList = true;
@@ -96,29 +98,47 @@ public class PictureDrag : MonoBehaviour
         }
     }
 
-    //Remove the object from both lists.
+    /// <summary>
+    /// Removes the object from the lists when it is destroyed.
+    /// </summary>
     void OnDestroy()
     {
         createdPictures.Remove(this.gameObject);
         selectedPicture.Remove(this.gameObject);
     }
 
+    /// <summary>
+    /// Returns a list of selected pictures.
+    /// </summary>
+    /// <returns></returns>
     public List<GameObject> getMovingObjects()
     {
         return selectedPicture;
     }
 
+    /// <summary>
+    /// Returns a list of created pictures.
+    /// </summary>
+    /// <returns></returns>
     public List<GameObject> getCreatedObjects()
     {
         return createdPictures;
     }
 
+    /// <summary>
+    /// Set obj as the first object in the list.
+    /// </summary>
+    /// <param name="obj"></param>
     public void setAsFirstInList(GameObject obj)
     {
         createdPictures.Remove(obj);
         createdPictures.Insert(0, obj);
     }
 
+    /// <summary>
+    /// If the picture is in the selected list, return.
+    /// </summary>
+    /// <returns></returns>
     public bool getIsInList()
     {
         return isInList;
