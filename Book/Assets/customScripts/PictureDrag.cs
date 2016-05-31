@@ -19,7 +19,7 @@ public class PictureDrag : MonoBehaviour
         createdPictures.Add(this.gameObject);
     }
 
-    /*
+    
     void Update()
     {
         if (Input.GetMouseButtonDown(1) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
@@ -73,7 +73,7 @@ public class PictureDrag : MonoBehaviour
             selectNDeselPic();
         }
     }
-    */
+    
 
     /// <summary>
     /// If it retruns true it is added to the list, false for removed.
@@ -83,6 +83,7 @@ public class PictureDrag : MonoBehaviour
     {
         if (!isInList)
         {
+            Debug.Log("Added");
             selectedPicture.Add(this.gameObject);
             isInList = true;
 
@@ -91,6 +92,7 @@ public class PictureDrag : MonoBehaviour
         }
         else
         {
+            Debug.Log("Removed");
             selectedPicture.Remove(this.gameObject);
             isInList = false;
             this.gameObject.GetComponent<Renderer>().material.DisableKeyword("_NORMALMAP");

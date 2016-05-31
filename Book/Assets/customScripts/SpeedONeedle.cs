@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Timers;
+using System;
 
 public class SpeedONeedle : MonoBehaviour {
 
     public float lowestSpeed = 200f;
     public float highestSpeed = 20f;
-    public int maxTurnSpeed = 10;
+    public int maxTurnSpeed = 5;
     public int needleSpeed = 10;
     //The speed to get to.
     public int speed = 0;
@@ -48,7 +49,7 @@ public class SpeedONeedle : MonoBehaviour {
     private void decreaseSpeed(object sender, ElapsedEventArgs e)
     {
         if (speed > 0)
-            speed -= 1;
+            speed -= speed;
         else
             speedDecreaseTimer.Enabled = false;
     }
@@ -59,10 +60,15 @@ public class SpeedONeedle : MonoBehaviour {
     /// <param name="speed"></param>
     internal void AddSpeed(int speed)
     {
-        /*
-        this.speed += speed;
-        if (!speedDecreaseTimer.Enabled)
-            initializeSpeedDecrease();
-        */
+        try
+        {
+            this.speed += speed;
+            if (!speedDecreaseTimer.Enabled)
+                initializeSpeedDecrease();
+        }
+        catch (Exception e)
+        {
+
+        }
     }
 }
