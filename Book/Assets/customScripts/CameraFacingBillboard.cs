@@ -57,8 +57,8 @@ void Update()
         
 
         int temp = Mathf.RoundToInt(book.GetPage());
-        pageNumberText.text = "" + temp;
+        pageNumberText.text = " Page : " + temp;
         transform.LookAt(transform.position + m_Camera.transform.rotation * Vector3.forward,
-            m_Camera.transform.rotation * Vector3.up);
+        m_Camera.transform.rotation * Vector3.up);
     }
 }

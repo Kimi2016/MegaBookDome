@@ -1,6 +1,7 @@
 ﻿
 using UnityEngine;
 using System.Collections;
+using System.IO;
 
 
 // Very simple script to allow mouse clicks to turn pages
@@ -19,22 +20,35 @@ public class MegaBookMouseControl : MonoBehaviour
     public bool forward = true;
     public ArrayList toMove = new ArrayList();
     private SpeedONeedle needle;
-    /* private Text pageNumberText;
-
-     void Start()
-     {
-         GameObject GUICanvas = book.transform.parent.transform.FindChild("SpeedCanvas").transform.gameObject;
-         pageNumberText = GUICanvas.transform.FindChild("Text").GetComponent<Text>();
-         pageNumberText.text = "";
-
-     }*/
+    private bool picNotAdded = true;
+    
     void Start()
     {
+
         this.needle = book.transform.parent.Find("SpeedCanvas").transform.Find("SpeedDial").GetChild(0).GetComponent<SpeedONeedle>();
     }
 
     void Update()
     {
+
+        //Delete this if statement and all in it after test.
+        if (picNotAdded)
+        {
+            int numTemp = 0;
+            bool front = true;
+            Object[] textures = Resources.LoadAll("Picture");
+            foreach (Object obj in textures)
+            {
+                book.SetPageTexture(Resources.Load("Picture/" + obj.name) as Texture2D, numTemp, front);
+                if (!front)
+                    numTemp++;
+                front = !front;
+                if (book.NumPages <= numTemp)
+                    break;
+            }
+            picNotAdded = false;
+        }
+        
         if (book)
         {
             //pageNumberText.text = "" + (int) book.GetPage();
