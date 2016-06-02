@@ -9,6 +9,7 @@ public class Random_Pic : MonoBehaviour {
     
 	void Start () {
         obj = GameObject.Find("Book").GetComponent<MegaBookBuilder>();
+        this.gameObject.GetComponent<Renderer>().material.DisableKeyword("_NORMALMAP");
 
         Random.seed = (int)System.DateTime.Now.Ticks;
         pageTexUsed = Random.Range(5, obj.NumPages - 1);
