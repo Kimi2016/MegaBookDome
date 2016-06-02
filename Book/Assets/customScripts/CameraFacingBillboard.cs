@@ -13,22 +13,19 @@ public class CameraFacingBillboard : MonoBehaviour
     void Start()
     {
         pageNumberText = transform.FindChild("PageNum").GetComponent<Text>();
-        int i = transform.childCount;
-        for (int x = 0;  x < i; x++)
-        {
-            transform.GetChild(x).gameObject.SetActive(false);
-        }
+        setChildrensActive(false);
         isShowing = false;
         isOverIt = false;
     }
 
     public void setChildrensActive(bool a)
     {
+        /*
         int i = transform.childCount;
         for (int x = 0; x < i; x++)
         {
             transform.GetChild(x).gameObject.SetActive(a);
-        }
+        }*/
     }
 
     private Ray ray;
