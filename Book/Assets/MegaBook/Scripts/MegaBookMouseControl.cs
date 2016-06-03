@@ -97,12 +97,12 @@ public class MegaBookMouseControl : MonoBehaviour
                 {
                     if (hit.collider == prevcollider)
                     {
-                        makeOutOfBookPicture(false, new Vector3(-1.5f, 0, 0) + prevcollider.transform.position, backTexture);
+                        makePage(false);
                     }
 
                     if (hit.collider == nextcollider)
                     {
-                        makeOutOfBookPicture(true, new Vector3(1.5f, 0, 0) + nextcollider.transform.position, frontTexture);
+                        makePage(true);
                     }
                 }
                 else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
@@ -137,6 +137,18 @@ public class MegaBookMouseControl : MonoBehaviour
 	book.SetPage((int) book.GetPage() - pages, false, pageTurnSound);
 	}
 
+    public void makePage(bool next)
+    {
+        if (!next)
+        {
+            makeOutOfBookPicture(false, new Vector3(-1.5f, 0, 0) + prevcollider.transform.position, backTexture);
+        }
+
+        if (next)
+        {
+            makeOutOfBookPicture(true, new Vector3(1.5f, 0, 0) + nextcollider.transform.position, frontTexture);
+        }
+    }
 
     //Front or back, front if true, push direction is relative to the page position, texture is the page texture if it is the standard once, it will do nothing.
     private void makeOutOfBookPicture(bool front, Vector3 pushDirection, Texture2D texture)

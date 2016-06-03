@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 //attached to collider within the book.
 
@@ -20,9 +21,9 @@ public class PageCollider : MonoBehaviour
             
                 PictureDrag pd = other.gameObject.GetComponent<PictureDrag>();
 
-                int pageNum = (int)book.GetPage();
+                int pageNum = Mathf.RoundToInt(book.GetPage());
                 if (!pd.getIsInList())
-                    setPage(other.gameObject, pageNum, next);
+                    setPage(other.gameObject, pageNum, next, true);
                 else if (pd.getIsInList())
                 {
                     bool front = next;
@@ -31,7 +32,7 @@ public class PageCollider : MonoBehaviour
                         bool done;
                         do
                         {
-                            done = setPage(value, pageNum, front);
+                            done = setPage(value, pageNum, front, false);
                             front = !front;
                             if (!front)
                                 pageNum++;
@@ -41,15 +42,26 @@ public class PageCollider : MonoBehaviour
         }
     }
 
-    private bool setPage(GameObject obj, int pageNum, bool front)
+    private bool setPage(GameObject obj, int pageNum, bool front, bool oneTime)
     {
-        Debug.Log(pageNum);
         if (!front)
             pageNum--;
         try
         {
             if (mouseController.getStandardTexture(front) != book.GetPageTexture(pageNum, front))
-                return false;
+            {
+                if (oneTime)
+                    try
+                    {
+                        mouseController.makePage(front);
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                else
+                    return false;
+            }
 
             Renderer renderer = obj.GetComponent<Renderer>();
             Texture2D texture = renderer.material.GetTexture("_MainTex") as Texture2D;
@@ -57,11 +69,11 @@ public class PageCollider : MonoBehaviour
             book.SetPageTexture(texture, pageNum, front);
             Destroy(obj);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             book.AddPages(2);
-            setPage(obj, pageNum, front);
-            Debug.Log(ex);
+            setPage(obj, pageNum, front, oneTime);
+            Debug.Log("Error : " + ex);
         }
         return true;
     }
