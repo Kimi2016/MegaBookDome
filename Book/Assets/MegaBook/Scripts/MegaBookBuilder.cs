@@ -12,6 +12,8 @@ using System.Threading;
 [ExecuteInEditMode]
 public class MegaBookBuilder : MonoBehaviour
 {
+    private int maxPageInBook = 20; //Temporary.
+
 	public List<MegaBookPage>		pages				= new List<MegaBookPage>();
 	public List<MegaBookPageParams>	pageparams			= new List<MegaBookPageParams>();
 	public int				seed				= 0;
@@ -2191,6 +2193,14 @@ public class MegaBookBuilder : MonoBehaviour
     //Startpoint is where the book start making pages, clearpages will clear the list pages, addPageNum will add the number of pages to the list.
     private void makePages(int startPoint, bool clearPages, int addPageNum)
     {
+        if(maxPageInBook <= NumPages && !clearPages)
+        {
+            frontpivot.y += 0.01f;
+            backpivot.y -= 0.01f;
+            GameObject obj = transform.FindChild("Spine").gameObject;
+            obj.transform.localScale = new Vector3(obj.transform.localScale.x, obj.transform.localScale.y * (frontpivot.y*100/2), obj.transform.localScale.z);
+            maxPageInBook += 5;
+        }
 
         Quaternion rot = transform.rotation;
         transform.rotation = Quaternion.identity;
@@ -2656,7 +2666,6 @@ public class MegaBookBuilder : MonoBehaviour
 
     public void RemoveUnnecessaryPages(bool front, Texture2D frontTexture, Texture2D backTexture, int pageNum)
     {
-        Debug.Log("Working??");
         pageNum++;
         int pageToRemove = 0;
 
