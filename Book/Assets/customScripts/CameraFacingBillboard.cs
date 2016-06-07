@@ -5,27 +5,27 @@ public class CameraFacingBillboard : MonoBehaviour
 {
     public Camera m_Camera;
     public MegaBookBuilder book;
+    public bool disableMouseOver = false;
     private Text pageNumberText;
-    private bool isShowing;
     private bool isOverIt;
 
 
     void Start()
     {
         pageNumberText = transform.FindChild("PageNum").GetComponent<Text>();
+        if(!disableMouseOver)
         setChildrensActive(false);
-        isShowing = false;
         isOverIt = false;
     }
 
     public void setChildrensActive(bool a)
     {
-        /*
+        
         int i = transform.childCount;
         for (int x = 0; x < i; x++)
         {
             transform.GetChild(x).gameObject.SetActive(a);
-        }*/
+        }
     }
 
     private Ray ray;
@@ -33,26 +33,28 @@ public class CameraFacingBillboard : MonoBehaviour
 
 void Update()
     {
-        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
+        if (!disableMouseOver)
         {
-            if (!isOverIt)
+            ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out hit))
             {
-                if (hit.collider.name == "NextPageHit" || hit.collider.name == "PrevPageHit")
+                if (!isOverIt)
                 {
-                    isOverIt = true;
-                    setChildrensActive(isOverIt);
+                    if (hit.collider.name == "NextPageHit" || hit.collider.name == "PrevPageHit")
+                    {
+                        isOverIt = true;
+                        setChildrensActive(isOverIt);
+                    }
                 }
             }
-        }
-        else if (isOverIt)
-        {
-            isOverIt = false;
-            setChildrensActive(isOverIt);
+            else if (isOverIt)
+            {
+                isOverIt = false;
+                setChildrensActive(isOverIt);
 
+            }
         }
         
-
         int temp = Mathf.RoundToInt(book.GetPage());
         pageNumberText.text = " Page : " + temp;
         transform.LookAt(transform.position + m_Camera.transform.rotation * Vector3.forward,

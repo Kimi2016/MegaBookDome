@@ -21,10 +21,11 @@ public class MegaBookMouseControl : MonoBehaviour
     public ArrayList toMove = new ArrayList();
     private SpeedONeedle needle;
     private bool picNotAdded = true;
+    public bool disableOnStart = false;
     
     void Start()
     {
-
+        gameObject.SetActive(!disableOnStart);
         this.needle = book.transform.parent.Find("SpeedCanvas").transform.Find("SpeedDial").GetChild(0).GetComponent<SpeedONeedle>();
         
     }

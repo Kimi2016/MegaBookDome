@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using Leap;
 using System.Timers;
-
+using System;
+using System.Collections.Generic;
 
 public class LeapController : MonoBehaviour
 {
@@ -18,7 +19,7 @@ public class LeapController : MonoBehaviour
     private Vector3 picturePosition;
     bool pictureCurrentlyDragged;
    //private LeapPageTurner leapPageTurner;
-    private LeapDragAndDrop leapDragAndDrop;
+  //  private LeapDragAndDrop leapDragAndDrop;
     private LeapPageTurnerV2 leapPageTurnerV2;
     private bool notTapping = true;
     private bool notTappingNTimer = true;
@@ -30,22 +31,18 @@ public class LeapController : MonoBehaviour
         controller = new Controller();
         leapProvider = FindObjectOfType<LeapProvider>() as LeapProvider;
         if (!controller.IsConnected)
-        {
             Debug.LogError("no LeapMotion Device detected...");
-
-        }
-        else {
+        else 
             Debug.Log("Device connected, continue");
-
-        }
+            
      //   leapPageTurner = new LeapPageTurner(book, controller, pageTurnSoundSlow, pageTurnSoundFast);
-        leapDragAndDrop = new LeapDragAndDrop(leapProvider);
+      //  leapDragAndDrop = new LeapDragAndDrop(leapProvider);
         leapPageTurnerV2 = new LeapPageTurnerV2(book, controller, pageTurnSoundSlow);
     }
 
-    public LeapDragAndDrop GetLeapDragAndDrop() {
+   /* public LeapDragAndDrop GetLeapDragAndDrop() {
         return leapDragAndDrop;
-    }
+    }*/
 
     void Update()
     {
@@ -62,7 +59,7 @@ public class LeapController : MonoBehaviour
             if (hand.IsRight)
             {
                 DragAndDropChecker(hand);
-                TapChecker(hand);
+                SelectChecker(frame.Hands);
                 //leapDragAndDrop.CheckDragAndDropGesture(hand);
             }
             if (!pictureCurrentlyDragged && hand.GrabStrength > 0.7)
@@ -87,31 +84,43 @@ public class LeapController : MonoBehaviour
         }
     }
 
-    private void TapChecker(Hand hand)
+    private void SelectChecker(List<Hand> hands)
     {
-        if (hand.GrabStrength < 0.4 && hand.PalmNormal.y < -0.7) // && hand.)
+        if (hands.Count > 1)
         {
-            // Debug.Log(hand.PalmNormal);
-            if (hand.Fingers[1].TipVelocity.y - hand.Fingers[3].TipVelocity.y < -0.4f && notTappingNTimer)
+            Hand leftHand = null;
+            Hand rightHand = null;
+            foreach (Hand hand in hands)
             {
-                Ray ray;
-                RaycastHit hit;
-                ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-                if (Physics.Raycast(ray, out hit))
-                {
-                        if (hit.collider.tag == "pic")
-                        {
-                        hit.transform.GetComponent<PictureDrag>().selectNDeselPic();
-                        }
-                }
-                notTapping = false;
-                notTappingNTimer = false;
-                initializeSpeedDecrease();
+                if (hand.IsRight)
+                    rightHand = hand;
+                else if (hand.IsLeft)
+                    leftHand = hand;
             }
-            else if (hand.Fingers[1].TipVelocity.y - hand.Fingers[3].TipVelocity.y > 0.3f && !notTappingNTimer)
+            if (leftHand != null && rightHand != null)
             {
-                notTapping = true;
+                if (leftHand.PalmNormal.y > 0.7)
+                {
+                    if (rightHand.GrabStrength > 0.7 && notTapping)
+                    {
+                        Ray ray;
+                        RaycastHit hit;
+                        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                        if (Physics.Raycast(ray, out hit))
+                        {
+                            if (hit.collider.tag == "pic")
+                            {
+                                hit.transform.GetComponent<PictureDrag>().selectNDeselPic();
+                            }
+                        }
+                        notTapping = false;
+                    }
+                    else if (rightHand.GrabStrength < 0.6)
+                    {
+                        notTapping = true;
+                    }
+                }
             }
         }
     }
@@ -149,8 +158,7 @@ public class LeapController : MonoBehaviour
 
             Material material = new Material(Shader.Find("Standard"));
             material.SetTexture("_MainTex", pageTexture);
-
-
+            
             book.SetPageTexture(texture, pageNum, front);
             material.SetTexture("_BumpMap", Resources.Load("Textures/MegaBook_Mask_Map") as Texture2D);
 
@@ -187,7 +195,15 @@ public class LeapController : MonoBehaviour
                             picturePosition.x = rightHand.PalmPosition.x;
                             picturePosition.z = rightHand.PalmPosition.z;
                             picturePosition.y = rightHand.PalmPosition.y - 0.2f;
+                            foreach (GameObject sPic in pic.GetComponent<PictureDrag>().getMovingObjects())
+                            {
+                                Vector3 relativeToMasterPic = sPic.transform.position + picturePosition;
+                                sPic.transform.position = new Vector3(relativeToMasterPic.x - pic.transform.position.x, relativeToMasterPic.y - pic.transform.position.y, relativeToMasterPic.z - pic.transform.position.z);
+                                /* Vector3 relativeToMasterPic = sPic.transform.position - picturePosition;
+                                 sPic.transform.position = relativeToMasterPic + pic.transform.position;*/
+                            }
                             pic.transform.position = picturePosition;
+                            
                             pic.GetComponent<PictureDrag>().setAsFirstInList(pic);
                             return;
                         }

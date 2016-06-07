@@ -15,7 +15,7 @@ public class Random_Pic : MonoBehaviour {
         frontText = (Random.value < 0.5);
     }
     
-    void Update()
+    void LateUpdate()
     {
         if (!picset)
         {

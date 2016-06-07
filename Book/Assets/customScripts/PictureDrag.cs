@@ -12,31 +12,41 @@ public class PictureDrag : MonoBehaviour
     private bool isInList = false;
     static List<GameObject> selectedPicture = new List<GameObject>(); //Selected picture, used for moving multiple pictures.
     static List<GameObject> createdPictures = new List<GameObject>(); //Used for moving one picture only, and also for multiple, where it will be used for the first one.
+    public bool disable = false;
+    static bool active;
 
     //Add the object to the created picture list, which is used to cycle though all objects and order them.
     void Start()
     {
+        if(active == null)
+        active = !disable;
         createdPictures.Add(this.gameObject);
     }
 
     
     void Update()
     {
-        if (Input.GetMouseButtonDown(1) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        if (active)
         {
-            selectedPicture.Clear();
+            if (Input.GetMouseButtonDown(1) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+            {
+                selectedPicture.Clear();
+            }
         }
     }
 
     void OnMouseDown()
     {
-        if (isInList)
+        if (active)
         {
-            foreach (GameObject value in selectedPicture)
-                value.GetComponent<PictureDrag>().mouseDown();
+            if (isInList)
+            {
+                foreach (GameObject value in selectedPicture)
+                    value.GetComponent<PictureDrag>().mouseDown();
+            }
+            else
+                mouseDown();
         }
-        else
-            mouseDown();
     }
 
     //Action to call when OnMouseDown is called.
@@ -49,13 +59,16 @@ public class PictureDrag : MonoBehaviour
 
     void OnMouseDrag()
     {
-        if (selectedPicture.Contains(this.gameObject))
+        if (active)
         {
-            foreach (GameObject value in selectedPicture)
-                value.GetComponent<PictureDrag>().mouseDrag();
+            if (selectedPicture.Contains(this.gameObject))
+            {
+                foreach (GameObject value in selectedPicture)
+                    value.GetComponent<PictureDrag>().mouseDrag();
+            }
+            else
+                mouseDrag();
         }
-        else
-            mouseDrag();
     }
 
     //Action to call when OnMouseDrag is called.
@@ -68,9 +81,12 @@ public class PictureDrag : MonoBehaviour
 
     void OnMouseUp()
     {
-        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        if (active)
         {
-            selectNDeselPic();
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            {
+                selectNDeselPic();
+            }
         }
     }
     

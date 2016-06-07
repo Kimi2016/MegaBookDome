@@ -11,13 +11,7 @@ public class MegaBookControl : MonoBehaviour
 	{
         Debug.Log("Starting Controller");
 	}
-
-    void OnGUI()
-    {
-        
-     
-    }
-
+    
 
     void Update()
 	{
@@ -28,5 +22,4 @@ public class MegaBookControl : MonoBehaviour
 			book.PrevPage(new AudioSource());
 
 	}
-
 }
